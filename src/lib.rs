@@ -1,3 +1,7 @@
+mod evm;
+mod opcode;
+
+use evm::Evm;
 use primitive_types::U256;
 
 pub struct EvmResult {
@@ -7,23 +11,14 @@ pub struct EvmResult {
 
 pub fn evm(_code: impl AsRef<[u8]>) -> EvmResult {
     let stack: Vec<U256> = Vec::new();
-    let mut pc = 0;
 
     let code = _code.as_ref();
+    let mut evm = Evm::new(Box::from(code), stack);
 
-    while pc < code.len() {
-        let opcode = code[pc];
-        pc += 1;
-
-        if opcode == 0x00 {
-            // STOP
-        }
-    }
-
-    // TODO: Implement
+    evm.execute();
 
     return EvmResult {
-        stack,
+        stack: evm.stack,
         success: true,
     };
 }
