@@ -34,6 +34,12 @@ impl Evm {
                 *pc += 1;
                 ExecutionResult::Success
             }
+            OpCode::PUSH1 => {
+                let push_data = self.code[*pc + 1];
+                self.stack.push(push_data.into());
+                *pc += 2;
+                ExecutionResult::Success
+            }
         }
     }
 }

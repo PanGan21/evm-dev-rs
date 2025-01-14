@@ -1,6 +1,7 @@
 pub enum OpCode {
     STOP = 0,
     PUSH0 = 95,
+    PUSH1 = 96,
 }
 
 impl TryFrom<u8> for OpCode {
@@ -10,6 +11,7 @@ impl TryFrom<u8> for OpCode {
         match value {
             0 => Ok(OpCode::STOP),
             95 => Ok(OpCode::PUSH0),
+            96 => Ok(OpCode::PUSH1),
             _ => Err("Unknown opcode".to_string()),
         }
     }
