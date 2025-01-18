@@ -1,20 +1,27 @@
-pub enum OpCode {
-    STOP = 0,
-    PUSH0 = 95,
-    PUSH1 = 96,
+macro_rules! opcodes {
+    ($($name:ident($number:expr),)*) => {
+        #[derive(Debug)]
+        pub enum OpCode {
+            $($name = $number,)*
+        }
+
+        impl TryFrom<u8> for OpCode {
+            type Error = String;
+
+            fn try_from(value: u8) -> Result<Self, Self::Error> {
+                match value {
+                    $($number => Ok(OpCode::$name),)*
+                    _ => Err("Unknown opcode".to_string()),
+                }
+            }
+        }
+    };
 }
 
-impl TryFrom<u8> for OpCode {
-    type Error = String;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(OpCode::STOP),
-            95 => Ok(OpCode::PUSH0),
-            96 => Ok(OpCode::PUSH1),
-            _ => Err("Unknown opcode".to_string()),
-        }
-    }
+opcodes! {
+    Stop(0),
+    Push0(95),
+    Push1(96),
 }
 
 impl OpCode {

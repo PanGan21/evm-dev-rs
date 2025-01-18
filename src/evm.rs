@@ -28,13 +28,13 @@ impl Evm {
 
     pub fn transact(&mut self, pc: &mut usize, opcode: OpCode) -> ExecutionResult {
         match opcode {
-            OpCode::STOP => ExecutionResult::Halt,
-            OpCode::PUSH0 => {
+            OpCode::Stop => ExecutionResult::Halt,
+            OpCode::Push0 => {
                 self.stack.push(0.into());
                 *pc += 1;
                 ExecutionResult::Success
             }
-            OpCode::PUSH1 => {
+            OpCode::Push1 => {
                 let push_data = self.code[*pc + 1];
                 self.stack.push(push_data.into());
                 *pc += 2;
