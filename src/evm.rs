@@ -34,12 +34,7 @@ impl Evm {
                 *pc += 1;
                 ExecutionResult::Success
             }
-            OpCode::Push1 => {
-                let push_data = self.code[*pc + 1];
-                self.stack.push(push_data.into());
-                *pc += 2;
-                ExecutionResult::Success
-            }
+            OpCode::Push1 => push(1, pc, &mut self.stack, self.code.as_ref()),
         }
     }
 }
@@ -48,4 +43,21 @@ pub enum ExecutionResult {
     Success,
     Halt,
     Revert,
+}
+
+fn push(x: usize, pc: &mut usize, stack: &mut Vec<U256>, code: &[u8]) -> ExecutionResult {
+    let start = *pc + 1;
+    let end = start + x;
+
+    if end <= code.len() {
+        let data = &code[start..end];
+        let value = U256::from_big_endian(data);
+
+        stack.push(value);
+        *pc += x + 1;
+
+        ExecutionResult::Success
+    } else {
+        ExecutionResult::Revert
+    }
 }
