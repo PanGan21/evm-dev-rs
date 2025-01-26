@@ -1,3 +1,4 @@
+mod errors;
 mod evm;
 mod opcode;
 
@@ -15,10 +16,19 @@ pub fn evm(_code: impl AsRef<[u8]>) -> EvmResult {
     let code = _code.as_ref();
     let mut evm = Evm::new(Box::from(code), stack);
 
-    evm.execute();
-
-    return EvmResult {
-        stack: evm.stack,
-        success: true,
-    };
+    let result = evm.execute();
+    match result {
+        evm::ExecutionResult::Success => EvmResult {
+            stack: evm.stack(),
+            success: true,
+        },
+        evm::ExecutionResult::Halt => EvmResult {
+            stack: evm.stack(),
+            success: true,
+        },
+        evm::ExecutionResult::Revert => EvmResult {
+            stack: evm.stack(),
+            success: false,
+        },
+    }
 }
