@@ -16,12 +16,11 @@ impl Evm {
         let mut pc = 0;
         while pc < self.code.len() {
             if let Some(opcode) = OpCode::new(self.code[pc]) {
-                match self.transact(&mut pc, opcode) {
-                    Ok(_) => {
-                        // move the pc to the next instruction
-                        pc += 1;
-                    }
-                    Err(ExecutionError::Halt) => return ExecutionResult::Halt,
+                if let Ok(_) = self.transact(&mut pc, opcode) {
+                    // move the pc to the next instruction
+                    pc += 1;
+                } else {
+                    return ExecutionResult::Halt;
                 }
             } else {
                 return ExecutionResult::Revert;
@@ -74,6 +73,10 @@ impl Evm {
                 *pc += push_data_size;
                 Ok(())
             }
+            OpCode::Pop => {
+                pop(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -102,4 +105,9 @@ fn push(
     stack.push(push_data);
 
     ExecutionResult::Success
+}
+
+fn pop(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let item = stack.pop().ok_or_else(|| ExecutionError::StackUnderflow)?;
+    Ok(item)
 }

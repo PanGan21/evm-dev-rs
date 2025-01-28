@@ -4,4 +4,6 @@ use thiserror::Error;
 pub enum ExecutionError {
     #[error("execution halt")]
     Halt,
+    #[error("stack underflow")]
+    StackUnderflow,
 }

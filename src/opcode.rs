@@ -20,6 +20,7 @@ macro_rules! opcodes {
 
 opcodes! {
     Stop(0),
+    Pop(80),
     Push0(95),
     Push1(96),
     Push2(97),
