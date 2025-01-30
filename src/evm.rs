@@ -81,6 +81,10 @@ impl Evm {
                 add(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Mul => {
+                mul(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -121,6 +125,16 @@ fn add(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let (new_item, _) = first.overflowing_add(second);
+    stack.push(new_item);
+
+    Ok(new_item)
+}
+
+fn mul(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let (new_item, _) = first.overflowing_mul(second);
     stack.push(new_item);
 
     Ok(new_item)
