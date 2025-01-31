@@ -101,6 +101,10 @@ impl Evm {
                 addmod(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::MulMod => {
+                mulmod(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -188,5 +192,10 @@ fn modop(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
 
 fn addmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let _ = add(stack)?;
+    modop(stack)
+}
+
+fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let _ = mul(stack)?;
     modop(stack)
 }
