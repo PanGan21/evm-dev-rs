@@ -89,6 +89,10 @@ impl Evm {
                 sub(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Div => {
+                div(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -149,6 +153,16 @@ fn sub(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let (new_item, _) = first.overflowing_sub(second);
+    stack.push(new_item);
+
+    Ok(new_item)
+}
+
+fn div(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let new_item = first.checked_div(second).unwrap_or(0.into());
     stack.push(new_item);
 
     Ok(new_item)
