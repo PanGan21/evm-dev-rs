@@ -187,11 +187,6 @@ fn modop(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
 }
 
 fn addmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
-    // let first = pop(stack)?;
-    // let second = pop(stack)?;
-
-    // let new_item = first.checked_rem(second).unwrap_or(0.into());
-    // stack.push(new_item);
     let _ = add(stack)?;
     modop(stack)
 }
