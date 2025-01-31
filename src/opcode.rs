@@ -24,6 +24,7 @@ opcodes! {
     Mul(2),
     Sub(3),
     Div(4),
+    Mod(6),
     Pop(80),
     Push0(95),
     Push1(96),

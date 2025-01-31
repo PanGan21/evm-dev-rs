@@ -93,6 +93,10 @@ impl Evm {
                 div(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Mod => {
+                modop(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -163,6 +167,16 @@ fn div(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let new_item = first.checked_div(second).unwrap_or(0.into());
+    stack.push(new_item);
+
+    Ok(new_item)
+}
+
+fn modop(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let new_item = first.checked_rem(second).unwrap_or(0.into());
     stack.push(new_item);
 
     Ok(new_item)
