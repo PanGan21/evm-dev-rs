@@ -22,6 +22,7 @@ impl Evm {
                 } else {
                     return ExecutionResult::Halt;
                 }
+                println!("STACK: {:#?}", self.stack());
             } else {
                 return ExecutionResult::Revert;
             }
@@ -195,7 +196,22 @@ fn addmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     modop(stack)
 }
 
-fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
-    let _ = mul(stack)?;
-    modop(stack)
+pub fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let a = pop(stack)?;
+    let b = pop(stack)?;
+    let n = pop(stack)?;
+
+    let mul = a.full_mul(b);
+    match mul.checked_rem(n.into()) {
+        Some(result) => {
+            let result = result.try_into().unwrap_or(0.into());
+            stack.push(result);
+            Ok(result)
+        }
+        None => {
+            let result = 0.into();
+            stack.push(result);
+            Ok(result)
+        }
+    }
 }
