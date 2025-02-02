@@ -27,6 +27,7 @@ opcodes! {
     Mod(6),
     AddMod(8),
     MulMod(9),
+    Exp(10),
     Pop(80),
     Push0(95),
     Push1(96),

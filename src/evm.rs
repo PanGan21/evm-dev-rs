@@ -106,6 +106,10 @@ impl Evm {
                 mulmod(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Exp => {
+                exp(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -197,12 +201,12 @@ fn addmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
 }
 
 pub fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
-    let a = pop(stack)?;
-    let b = pop(stack)?;
-    let n = pop(stack)?;
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+    let third = pop(stack)?;
 
-    let mul = a.full_mul(b);
-    match mul.checked_rem(n.into()) {
+    let mul = first.full_mul(second);
+    match mul.checked_rem(third.into()) {
         Some(result) => {
             let result = result.try_into().unwrap_or(0.into());
             stack.push(result);
@@ -214,4 +218,13 @@ pub fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
             Ok(result)
         }
     }
+}
+
+pub fn exp(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let (result, _) = first.overflowing_pow(second);
+    stack.push(result);
+    Ok(result)
 }
