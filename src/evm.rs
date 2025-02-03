@@ -110,6 +110,10 @@ impl Evm {
                 exp(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Signextend => {
+                sign_extend(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -225,6 +229,30 @@ pub fn exp(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let (result, _) = first.overflowing_pow(second);
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn sign_extend(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let sign = second.byte(first.as_usize());
+
+    let mut data = second.to_little_endian();
+
+    for i in 0..32 {
+        if i as usize > first.as_usize() {
+            if sign > 0x7f {
+                data[i] = 0xFF;
+            } else {
+                data[i] = 0x00;
+            }
+        }
+    }
+
+    let result = U256::from_little_endian(&data);
+
     stack.push(result);
     Ok(result)
 }
