@@ -134,6 +134,10 @@ impl Evm {
                 slt(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Sgt => {
+                sgt(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -368,6 +372,29 @@ pub fn slt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
         (true, false) => true,
         (false, true) => false,
         (false, false) => first < second,
+    };
+
+    let result = match result {
+        true => 1.into(),
+        false => 0.into(),
+    };
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn sgt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let is_first_negative = first.bit(255);
+    let is_second_negative = second.bit(255);
+
+    let result = match (is_first_negative, is_second_negative) {
+        (true, true) => !(first.overflowing_neg() >= second.overflowing_neg()),
+        (true, false) => false,
+        (false, true) => true,
+        (false, false) => first > second,
     };
 
     let result = match result {
