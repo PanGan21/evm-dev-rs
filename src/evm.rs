@@ -142,6 +142,10 @@ impl Evm {
                 eq(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Iszero => {
+                iszero(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -418,6 +422,19 @@ pub fn eq(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let result = match result {
         true => 1.into(),
         false => 0.into(),
+    };
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn iszero(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let item = pop(stack)?;
+
+    let result = if item.is_zero() {
+        U256::one()
+    } else {
+        U256::zero()
     };
 
     stack.push(result);
