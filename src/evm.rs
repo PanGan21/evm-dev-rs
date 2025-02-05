@@ -126,6 +126,10 @@ impl Evm {
                 lt(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Gt => {
+                gt(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -325,6 +329,20 @@ pub fn lt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let result = first < second;
+    let result = match result {
+        true => 1.into(),
+        false => 0.into(),
+    };
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn gt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = first > second;
     let result = match result {
         true => 1.into(),
         false => 0.into(),
