@@ -102,6 +102,10 @@ impl Evm {
                 modop(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Smod => {
+                smod(&mut self.stack)?;
+                Ok(())
+            }
             OpCode::AddMod => {
                 addmod(&mut self.stack)?;
                 Ok(())
@@ -280,6 +284,31 @@ pub fn sdiv(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let mut result = first.checked_div(second).unwrap_or(U256::zero());
 
     if is_first_negative != is_second_negative {
+        (result, _) = result.overflowing_neg();
+    }
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn smod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let mut first = pop(stack)?;
+    let mut second = pop(stack)?;
+
+    let is_first_negative = first.bit(255);
+    let is_second_negative = second.bit(255);
+
+    if is_first_negative {
+        (first, _) = first.overflowing_neg();
+    }
+
+    if is_second_negative {
+        (second, _) = second.overflowing_neg();
+    }
+
+    let mut result = first.checked_rem(second).unwrap_or(U256::zero());
+
+    if is_first_negative && is_second_negative {
         (result, _) = result.overflowing_neg();
     }
 
