@@ -150,6 +150,10 @@ impl Evm {
                 not(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::And => {
+                and(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -448,6 +452,16 @@ pub fn iszero(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
 pub fn not(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let item = pop(stack)?;
     let result = !item;
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn and(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = first & second;
 
     stack.push(result);
     Ok(result)
