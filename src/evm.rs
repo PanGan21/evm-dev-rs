@@ -94,6 +94,10 @@ impl Evm {
                 div(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Sdiv => {
+                sdiv(&mut self.stack)?;
+                Ok(())
+            }
             OpCode::Mod => {
                 modop(&mut self.stack)?;
                 Ok(())
@@ -123,6 +127,7 @@ impl Evm {
     }
 }
 
+#[derive(Debug)]
 pub enum ExecutionResult {
     Success,
     Halt,
@@ -252,6 +257,31 @@ pub fn sign_extend(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     }
 
     let result = U256::from_little_endian(&data);
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn sdiv(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let mut first = pop(stack)?;
+    let mut second = pop(stack)?;
+
+    let is_first_negative = first.bit(255);
+    let is_second_negative = second.bit(255);
+
+    if is_first_negative {
+        (first, _) = first.overflowing_neg();
+    }
+
+    if is_second_negative {
+        (second, _) = second.overflowing_neg();
+    }
+
+    let mut result = first.checked_div(second).unwrap_or(U256::zero());
+
+    if is_first_negative != is_second_negative {
+        (result, _) = result.overflowing_neg();
+    }
 
     stack.push(result);
     Ok(result)

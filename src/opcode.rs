@@ -24,6 +24,7 @@ opcodes! {
     Mul(2),
     Sub(3),
     Div(4),
+    Sdiv(5),
     Mod(6),
     AddMod(8),
     MulMod(9),

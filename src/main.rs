@@ -32,7 +32,6 @@ fn main() {
         println!("Test {} of {}: {}", index + 1, total, test.name);
 
         let code = hex::decode(&test.code.bin).unwrap();
-
         let result = evm(code);
 
         let mut expected_stack: Vec<U256> = Vec::new();
