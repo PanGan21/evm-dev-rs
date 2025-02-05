@@ -37,6 +37,7 @@ opcodes! {
     Sgt(19),
     Eq(20),
     Iszero(21),
+    Not(25),
     Pop(80),
     Push0(95),
     Push1(96),

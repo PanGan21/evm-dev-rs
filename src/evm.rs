@@ -146,6 +146,10 @@ impl Evm {
                 iszero(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Not => {
+                not(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -436,6 +440,14 @@ pub fn iszero(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     } else {
         U256::zero()
     };
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn not(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let item = pop(stack)?;
+    let result = !item;
 
     stack.push(result);
     Ok(result)
