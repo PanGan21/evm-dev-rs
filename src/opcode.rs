@@ -35,6 +35,7 @@ opcodes! {
     Gt(17),
     Slt(18),
     Sgt(19),
+    Eq(20),
     Pop(80),
     Push0(95),
     Push1(96),

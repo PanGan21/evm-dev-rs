@@ -138,6 +138,10 @@ impl Evm {
                 sgt(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Eq => {
+                eq(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -397,6 +401,20 @@ pub fn sgt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
         (false, false) => first > second,
     };
 
+    let result = match result {
+        true => 1.into(),
+        false => 0.into(),
+    };
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn eq(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = first == second;
     let result = match result {
         true => 1.into(),
         false => 0.into(),
