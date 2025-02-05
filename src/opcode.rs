@@ -39,6 +39,7 @@ opcodes! {
     Iszero(21),
     And(22),
     Or(23),
+    Xor(24),
     Not(25),
     Pop(80),
     Push0(95),
