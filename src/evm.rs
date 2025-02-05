@@ -154,6 +154,10 @@ impl Evm {
                 and(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Or => {
+                or(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -462,6 +466,16 @@ pub fn and(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let result = first & second;
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn or(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = first | second;
 
     stack.push(result);
     Ok(result)

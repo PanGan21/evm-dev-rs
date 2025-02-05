@@ -38,6 +38,7 @@ opcodes! {
     Eq(20),
     Iszero(21),
     And(22),
+    Or(23),
     Not(25),
     Pop(80),
     Push0(95),
