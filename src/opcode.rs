@@ -31,6 +31,7 @@ opcodes! {
     MulMod(9),
     Exp(10),
     Signextend(11),
+    Lt(16),
     Pop(80),
     Push0(95),
     Push1(96),

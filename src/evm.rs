@@ -122,6 +122,10 @@ impl Evm {
                 sign_extend(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Lt => {
+                lt(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -311,6 +315,20 @@ pub fn smod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     if is_first_negative && is_second_negative {
         (result, _) = result.overflowing_neg();
     }
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn lt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = first < second;
+    let result = match result {
+        true => 1.into(),
+        false => 0.into(),
+    };
 
     stack.push(result);
     Ok(result)
