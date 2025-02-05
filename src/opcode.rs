@@ -33,6 +33,7 @@ opcodes! {
     Signextend(11),
     Lt(16),
     Gt(17),
+    Slt(18),
     Pop(80),
     Push0(95),
     Push1(96),
