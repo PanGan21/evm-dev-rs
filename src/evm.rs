@@ -162,6 +162,10 @@ impl Evm {
                 xor(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Shl => {
+                shl(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -490,6 +494,16 @@ pub fn xor(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let result = first ^ second;
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn shl(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = second << first;
 
     stack.push(result);
     Ok(result)
