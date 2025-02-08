@@ -166,6 +166,10 @@ impl Evm {
                 shl(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Shr => {
+                shr(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -504,6 +508,29 @@ pub fn shl(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let second = pop(stack)?;
 
     let result = second << first;
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn shr(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let is_second_negative = second.bit(255);
+
+    let mut result: U256;
+    if is_second_negative {
+        let (second_negated, _) = second.overflowing_neg();
+        result = second_negated >> first;
+        if result.is_zero() {
+            result = U256::max_value();
+        } else {
+            (result, _) = result.overflowing_neg();
+        }
+    } else {
+        result = second >> first;
+    }
 
     stack.push(result);
     Ok(result)

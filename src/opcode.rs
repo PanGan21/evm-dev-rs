@@ -42,6 +42,7 @@ opcodes! {
     Xor(24),
     Not(25),
     Shl(27),
+    Shr(28),
     Pop(80),
     Push0(95),
     Push1(96),
