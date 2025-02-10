@@ -174,6 +174,10 @@ impl Evm {
                 sar(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Byte => {
+                byte(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -545,6 +549,25 @@ pub fn sar(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     } else {
         result = second >> first;
     }
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn byte(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let i = pop(stack)?;
+    let x = pop(stack)?;
+
+    // `i` must be less than 31 to avoid exceeding the max byte width (32).
+    if i > U256::from(31) {
+        // if the byte offset is out of range, the result is 0.
+        stack.push(U256::zero());
+        return Ok(U256::zero());
+    }
+
+    // `31 - i` is needed because in the `byte` opcode `i` represents the byte offset starting from the most significant byte.
+    let result = x.byte(31 - i.as_usize());
+    let result = result.into();
 
     stack.push(result);
     Ok(result)

@@ -41,6 +41,7 @@ opcodes! {
     Or(23),
     Xor(24),
     Not(25),
+    Byte(26),
     Shl(27),
     Shr(28),
     Sar(29),
