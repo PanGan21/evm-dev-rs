@@ -170,6 +170,10 @@ impl Evm {
                 shr(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Sar => {
+                sar(&mut self.stack)?;
+                Ok(())
+            }
         }
     }
 
@@ -514,6 +518,16 @@ pub fn shl(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
 }
 
 pub fn shr(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+    let second = pop(stack)?;
+
+    let result = second >> first;
+
+    stack.push(result);
+    Ok(result)
+}
+
+pub fn sar(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
