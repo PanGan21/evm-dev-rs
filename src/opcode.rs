@@ -80,6 +80,7 @@ opcodes! {
     Push31(126),
     Push32(127),
     Dup1(128),
+    Dup2(129),
 
 }
 
@@ -136,6 +137,7 @@ impl OpCode {
     pub fn data_index(&self) -> usize {
         match self {
             OpCode::Dup1 => 1,
+            OpCode::Dup2 => 2,
             _ => 0,
         }
     }
