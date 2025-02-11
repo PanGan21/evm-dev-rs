@@ -178,6 +178,11 @@ impl Evm {
                 byte(&mut self.stack)?;
                 Ok(())
             }
+            OpCode::Dup1 => {
+                let data_index = opcode.data_index();
+                duplicate(&mut self.stack, data_index)?;
+                Ok(())
+            }
         }
     }
 
@@ -571,4 +576,27 @@ pub fn byte(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
 
     stack.push(result);
     Ok(result)
+}
+
+pub fn duplicate(stack: &mut Vec<U256>, duplicated_index: usize) -> Result<U256, ExecutionError> {
+    let mut ignored = vec![];
+    // pop all preceding values from the stack.
+    for _ in 0..duplicated_index - 1 {
+        ignored.push(pop(stack)?);
+    }
+
+    let duplicated_data = pop(stack)?;
+
+    // re-push original (duplicated) data into the stack
+    stack.push(duplicated_data);
+
+    // re-push ignored data into the stack
+    for ignored_value in ignored {
+        stack.push(ignored_value);
+    }
+
+    // push the duplicated value into the stack
+    stack.push(duplicated_data);
+
+    Ok(duplicated_data)
 }

@@ -79,6 +79,7 @@ opcodes! {
     Push30(125),
     Push31(126),
     Push32(127),
+    Dup1(128),
 
 }
 
@@ -127,6 +128,14 @@ impl OpCode {
             OpCode::Push30 => 30,
             OpCode::Push31 => 31,
             OpCode::Push32 => 32,
+            _ => 0,
+        }
+    }
+
+    /// Helper function to determine the data to be duplicated for each `Dup` and `Swap`` opcode
+    pub fn data_index(&self) -> usize {
+        match self {
+            OpCode::Dup1 => 1,
             _ => 0,
         }
     }
