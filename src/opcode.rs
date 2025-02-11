@@ -81,6 +81,7 @@ opcodes! {
     Push32(127),
     Dup1(128),
     Dup2(129),
+    Dup3(130),
 
 }
 
@@ -138,6 +139,7 @@ impl OpCode {
         match self {
             OpCode::Dup1 => 1,
             OpCode::Dup2 => 2,
+            OpCode::Dup3 => 3,
             _ => 0,
         }
     }

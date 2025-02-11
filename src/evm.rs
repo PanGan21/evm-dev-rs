@@ -178,7 +178,7 @@ impl Evm {
                 byte(&mut self.stack)?;
                 Ok(())
             }
-            OpCode::Dup1 | OpCode::Dup2 => {
+            OpCode::Dup1 | OpCode::Dup2 | OpCode::Dup3 => {
                 let data_index = opcode.data_index();
                 duplicate(&mut self.stack, data_index)?;
                 Ok(())
@@ -591,7 +591,7 @@ pub fn duplicate(stack: &mut Vec<U256>, duplicated_index: usize) -> Result<U256,
     stack.push(duplicated_data);
 
     // re-push ignored data into the stack
-    for ignored_value in ignored {
+    for ignored_value in ignored.into_iter().rev() {
         stack.push(ignored_value);
     }
 
