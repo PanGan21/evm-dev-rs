@@ -189,7 +189,8 @@ impl Evm {
             | OpCode::Dup9
             | OpCode::Dup10
             | OpCode::Dup11
-            | OpCode::Dup12 => {
+            | OpCode::Dup12
+            | OpCode::Dup13 => {
                 let data_index = opcode.data_index();
                 duplicate(&mut self.stack, data_index)?;
                 Ok(())
