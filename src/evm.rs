@@ -178,7 +178,7 @@ impl Evm {
                 byte(&mut self.stack)?;
                 Ok(())
             }
-            OpCode::Dup1 | OpCode::Dup2 | OpCode::Dup3 => {
+            OpCode::Dup1 | OpCode::Dup2 | OpCode::Dup3 | OpCode::Dup4 => {
                 let data_index = opcode.data_index();
                 duplicate(&mut self.stack, data_index)?;
                 Ok(())
