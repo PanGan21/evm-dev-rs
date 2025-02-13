@@ -88,6 +88,8 @@ opcodes! {
     Dup7(134),
     Dup8(135),
     Dup9(136),
+    Dup10(137),
+    Dup11(138),
 }
 
 impl OpCode {
@@ -151,6 +153,8 @@ impl OpCode {
             OpCode::Dup7 => 7,
             OpCode::Dup8 => 8,
             OpCode::Dup9 => 9,
+            OpCode::Dup10 => 10,
+            OpCode::Dup11 => 11,
             _ => 0,
         }
     }
