@@ -95,6 +95,7 @@ opcodes! {
     Dup14(141),
     Dup15(142),
     Dup16(143),
+    Swap1(144),
 }
 
 impl OpCode {
@@ -149,7 +150,7 @@ impl OpCode {
     /// Helper function to determine the data to be duplicated for each `Dup` and `Swap`` opcode
     pub fn data_index(&self) -> usize {
         match self {
-            OpCode::Dup1 => 1,
+            OpCode::Dup1 | OpCode::Swap1 => 1,
             OpCode::Dup2 => 2,
             OpCode::Dup3 => 3,
             OpCode::Dup4 => 4,

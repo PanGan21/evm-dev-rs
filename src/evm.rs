@@ -198,6 +198,11 @@ impl Evm {
                 duplicate(&mut self.stack, data_index)?;
                 Ok(())
             }
+            OpCode::Swap1 => {
+                let data_index = opcode.data_index();
+                swap(&mut self.stack, data_index)?;
+                Ok(())
+            }
         }
     }
 
@@ -614,4 +619,29 @@ pub fn duplicate(stack: &mut Vec<U256>, duplicated_index: usize) -> Result<U256,
     stack.push(duplicated_data);
 
     Ok(duplicated_data)
+}
+
+pub fn swap(stack: &mut Vec<U256>, swap_data_index: usize) -> Result<U256, ExecutionError> {
+    let first = pop(stack)?;
+
+    let mut ignored_values = vec![];
+    // pop all preceding values from the stack.
+    for _ in 0..swap_data_index - 1 {
+        ignored_values.push(pop(stack)?);
+    }
+
+    let swap_data = pop(stack)?;
+
+    // push first item into the stack
+    stack.push(first);
+
+    // re-push ignored data into the stack.
+    for ignored_value in ignored_values.into_iter().rev() {
+        stack.push(ignored_value);
+    }
+
+    // push the swap data into the stack.
+    stack.push(swap_data);
+
+    Ok(swap_data)
 }
