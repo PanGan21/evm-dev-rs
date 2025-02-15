@@ -203,7 +203,8 @@ impl Evm {
             | OpCode::Swap3
             | OpCode::Swap4
             | OpCode::Swap5
-            | OpCode::Swap6 => {
+            | OpCode::Swap6
+            | OpCode::Swap7 => {
                 let data_index = opcode.data_index();
                 swap(&mut self.stack, data_index)?;
                 Ok(())
