@@ -198,7 +198,7 @@ impl Evm {
                 duplicate(&mut self.stack, data_index)?;
                 Ok(())
             }
-            OpCode::Swap1 | OpCode::Swap2 | OpCode::Swap3 | OpCode::Swap4 => {
+            OpCode::Swap1 | OpCode::Swap2 | OpCode::Swap3 | OpCode::Swap4 | OpCode::Swap5 => {
                 let data_index = opcode.data_index();
                 swap(&mut self.stack, data_index)?;
                 Ok(())
