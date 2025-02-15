@@ -97,6 +97,7 @@ opcodes! {
     Dup16(143),
     Swap1(144),
     Swap2(145),
+    Swap3(146),
 }
 
 impl OpCode {
@@ -153,7 +154,7 @@ impl OpCode {
         match self {
             OpCode::Dup1 | OpCode::Swap1 => 1,
             OpCode::Dup2 | OpCode::Swap2 => 2,
-            OpCode::Dup3 => 3,
+            OpCode::Dup3 | OpCode::Swap3 => 3,
             OpCode::Dup4 => 4,
             OpCode::Dup5 => 5,
             OpCode::Dup6 => 6,
