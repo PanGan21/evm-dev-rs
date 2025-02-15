@@ -100,6 +100,7 @@ opcodes! {
     Swap3(146),
     Swap4(147),
     Swap5(148),
+    Swap6(149),
 }
 
 impl OpCode {
@@ -159,7 +160,7 @@ impl OpCode {
             OpCode::Dup3 | OpCode::Swap3 => 3,
             OpCode::Dup4 | OpCode::Swap4 => 4,
             OpCode::Dup5 | OpCode::Swap5 => 5,
-            OpCode::Dup6 => 6,
+            OpCode::Dup6 | OpCode::Swap6 => 6,
             OpCode::Dup7 => 7,
             OpCode::Dup8 => 8,
             OpCode::Dup9 => 9,
