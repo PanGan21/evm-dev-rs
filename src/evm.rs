@@ -222,6 +222,11 @@ impl Evm {
                 self.stack.push((*pc).into());
                 Ok(())
             }
+            OpCode::Gas => {
+                // not supported and return always max U256
+                self.stack.push(U256::max_value());
+                Ok(())
+            }
         }
     }
 

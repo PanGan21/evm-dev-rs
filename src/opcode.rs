@@ -47,6 +47,7 @@ opcodes! {
     Sar(29),
     Pop(80),
     Pc(88),
+    Gas(90),
     Push0(95),
     Push1(96),
     Push2(97),
