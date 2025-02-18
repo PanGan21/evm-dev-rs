@@ -46,6 +46,7 @@ opcodes! {
     Shr(28),
     Sar(29),
     Pop(80),
+    Pc(88),
     Push0(95),
     Push1(96),
     Push2(97),

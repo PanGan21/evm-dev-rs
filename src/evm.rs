@@ -218,6 +218,10 @@ impl Evm {
                 swap(&mut self.stack, data_index)?;
                 Ok(())
             }
+            OpCode::Pc => {
+                self.stack.push((*pc).into());
+                Ok(())
+            }
         }
     }
 
