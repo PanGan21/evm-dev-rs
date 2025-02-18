@@ -1,6 +1,6 @@
 use primitive_types::U256;
 
-use crate::{errors::ExecutionError, opcode::OpCode};
+use crate::{errors::ExecutionError, jumpdest::is_valid_jumpdest, opcode::OpCode};
 
 pub struct Evm {
     pub code: Box<[u8]>,
@@ -218,6 +218,11 @@ impl Evm {
                 swap(&mut self.stack, data_index)?;
                 Ok(())
             }
+            OpCode::Jump => {
+                let counter = pop(&mut self.stack)?;
+                jump(counter, &self.code, pc)?;
+                Ok(())
+            }
             OpCode::Pc => {
                 self.stack.push((*pc).into());
                 Ok(())
@@ -227,6 +232,7 @@ impl Evm {
                 self.stack.push(U256::max_value());
                 Ok(())
             }
+            OpCode::Jumpdest => Ok(()),
         }
     }
 
@@ -668,4 +674,13 @@ pub fn swap(stack: &mut Vec<U256>, swap_data_index: usize) -> Result<U256, Execu
     stack.push(swap_data);
 
     Ok(swap_data)
+}
+
+pub fn jump(counter: U256, code: &[u8], pc: &mut usize) -> Result<U256, ExecutionError> {
+    if is_valid_jumpdest(counter, code)? {
+        *pc = counter.as_usize();
+        Ok(counter)
+    } else {
+        Err(ExecutionError::InvalidJumpDestination)
+    }
 }

@@ -1,6 +1,6 @@
 macro_rules! opcodes {
     ($($name:ident($number:expr),)*) => {
-        #[derive(Debug)]
+        #[derive(Debug, PartialEq, PartialOrd)]
         pub enum OpCode {
             $($name = $number,)*
         }
@@ -46,8 +46,10 @@ opcodes! {
     Shr(28),
     Sar(29),
     Pop(80),
+    Jump(86),
     Pc(88),
     Gas(90),
+    Jumpdest(91),
     Push0(95),
     Push1(96),
     Push2(97),
@@ -185,5 +187,9 @@ impl OpCode {
             OpCode::Dup16 | OpCode::Swap16 => 16,
             _ => 0,
         }
+    }
+
+    pub fn is_push(&self) -> bool {
+        OpCode::Push0 <= *self && *self <= OpCode::Push32
     }
 }

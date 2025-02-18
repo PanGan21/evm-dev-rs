@@ -1,5 +1,6 @@
 mod errors;
 mod evm;
+mod jumpdest;
 mod opcode;
 
 use evm::Evm;
