@@ -16,13 +16,14 @@ impl Evm {
         let mut pc = 0;
         while pc < self.code.len() {
             if let Some(opcode) = OpCode::new(self.code[pc]) {
-                if let Ok(_) = self.transact(&mut pc, opcode) {
-                    // move the pc to the next instruction
-                    pc += 1;
-                } else {
-                    return ExecutionResult::Halt;
+                match self.transact(&mut pc, opcode) {
+                    Ok(_) => {
+                        // move the pc to the next instruction
+                        pc += 1;
+                    }
+                    Err(ExecutionError::Halt) => return ExecutionResult::Halt,
+                    Err(_) => return ExecutionResult::Revert,
                 }
-                println!("STACK: {:#?}", self.stack());
             } else {
                 return ExecutionResult::Revert;
             }
@@ -677,7 +678,8 @@ pub fn swap(stack: &mut Vec<U256>, swap_data_index: usize) -> Result<U256, Execu
 }
 
 pub fn jump(counter: U256, code: &[u8], pc: &mut usize) -> Result<U256, ExecutionError> {
-    if is_valid_jumpdest(counter, code)? {
+    let is_valid = is_valid_jumpdest(counter, code)?;
+    if is_valid {
         *pc = counter.as_usize();
         Ok(counter)
     } else {
