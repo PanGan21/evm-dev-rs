@@ -46,6 +46,8 @@ opcodes! {
     Shr(28),
     Sar(29),
     Pop(80),
+    Mload(81),
+    Mstore(82),
     Jump(86),
     Jumpi(87),
     Pc(88),

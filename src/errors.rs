@@ -10,4 +10,6 @@ pub enum ExecutionError {
     Halt,
     #[error("stack underflow")]
     StackUnderflow,
+    #[error("integer underflow")]
+    IntegerOverflow,
 }

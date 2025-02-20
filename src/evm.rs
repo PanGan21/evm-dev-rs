@@ -1,15 +1,20 @@
 use primitive_types::U256;
 
-use crate::{errors::ExecutionError, jumpdest::is_valid_jumpdest, opcode::OpCode};
+use crate::{errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory, opcode::OpCode};
 
 pub struct Evm {
     pub code: Box<[u8]>,
     pub stack: Vec<U256>,
+    pub memory: Memory,
 }
 
 impl Evm {
     pub fn new(code: Box<[u8]>, stack: Vec<U256>) -> Self {
-        Self { code, stack }
+        Self {
+            code,
+            stack,
+            memory: Memory::new(),
+        }
     }
 
     pub fn execute(&mut self) -> ExecutionResult {
@@ -243,6 +248,14 @@ impl Evm {
                 Ok(())
             }
             OpCode::Jumpdest => Ok(()),
+            OpCode::Mstore => {
+                mstore(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
+            OpCode::Mload => {
+                mload(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
         }
     }
 
@@ -694,4 +707,19 @@ pub fn jump(counter: U256, code: &[u8], pc: &mut usize) -> Result<U256, Executio
     } else {
         Err(ExecutionError::InvalidJumpDestination)
     }
+}
+
+pub fn mstore(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+    let offset = pop(stack)?;
+    let word = pop(stack)?;
+
+    memory.save_word(offset.as_usize(), word)
+}
+
+pub fn mload(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+    let offset = pop(stack)?;
+    let word = memory.get_word(offset.as_usize())?;
+
+    stack.push(word);
+    Ok(word.into())
 }
