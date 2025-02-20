@@ -224,6 +224,15 @@ impl Evm {
                 jump(counter, &self.code, pc)?;
                 Ok(())
             }
+            OpCode::Jumpi => {
+                let first = pop(&mut self.stack)?;
+                let second = pop(&mut self.stack)?;
+                if !second.is_zero() {
+                    jump(first, &self.code, pc)?;
+                    return Ok(());
+                }
+                Ok(())
+            }
             OpCode::Pc => {
                 self.stack.push((*pc).into());
                 Ok(())

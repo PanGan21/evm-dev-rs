@@ -47,6 +47,7 @@ opcodes! {
     Sar(29),
     Pop(80),
     Jump(86),
+    Jumpi(87),
     Pc(88),
     Gas(90),
     Jumpdest(91),
