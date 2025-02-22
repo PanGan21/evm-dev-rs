@@ -268,6 +268,12 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Origin => {
+                let value = U256::from_big_endian(&self.tx_data.origin);
+                self.stack.push(value);
+
+                Ok(())
+            }
             OpCode::Gas => {
                 // not supported and return always max U256
                 self.stack.push(U256::max_value());

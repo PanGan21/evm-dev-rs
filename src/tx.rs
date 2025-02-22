@@ -2,6 +2,7 @@
 pub struct TxData {
     pub to: Vec<u8>,
     pub from: Vec<u8>,
+    pub origin: Vec<u8>,
 }
 
 impl TxData {
@@ -10,11 +11,13 @@ impl TxData {
             Self {
                 to: tx_data[0].clone(),
                 from: tx_data[1].clone(),
+                origin: tx_data[2].clone(),
             }
         } else {
             Self {
                 to: vec![],
                 from: vec![],
+                origin: vec![],
             }
         }
     }

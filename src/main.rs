@@ -23,6 +23,7 @@ struct Code {
 struct TxDataRaw {
     to: Option<String>,
     from: Option<String>,
+    origin: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -57,7 +58,13 @@ fn main() {
                 ))
                 .unwrap();
 
-                vec![to, from]
+                let origin = hex::decode(format!(
+                    "{:0>64}",
+                    &tx.origin.as_ref().unwrap_or(&String::from("aa"))[2..]
+                ))
+                .unwrap();
+
+                vec![to, from, origin]
             }
             None => vec![],
         };

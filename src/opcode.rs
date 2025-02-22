@@ -47,6 +47,7 @@ opcodes! {
     Sar(29),
     Sha3(32),
     Address(48),
+    Origin(50),
     Caller(51),
     Pop(80),
     Mload(81),
