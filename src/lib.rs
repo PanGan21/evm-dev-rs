@@ -3,6 +3,7 @@ mod evm;
 mod jumpdest;
 mod memory;
 mod opcode;
+mod utils;
 
 use evm::Evm;
 use primitive_types::U256;

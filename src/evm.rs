@@ -1,6 +1,9 @@
 use primitive_types::U256;
 
-use crate::{errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory, opcode::OpCode};
+use crate::{
+    errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory, opcode::OpCode,
+    utils::sha3_hash,
+};
 
 pub struct Evm {
     pub code: Box<[u8]>,
@@ -247,6 +250,10 @@ impl Evm {
                 self.stack.push(size.into());
                 Ok(())
             }
+            OpCode::Sha3 => {
+                sha3(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
             OpCode::Gas => {
                 // not supported and return always max U256
                 self.stack.push(U256::max_value());
@@ -356,7 +363,7 @@ fn addmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     modop(stack)
 }
 
-pub fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
     let third = pop(stack)?;
@@ -376,7 +383,7 @@ pub fn mulmod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     }
 }
 
-pub fn exp(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn exp(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -385,7 +392,7 @@ pub fn exp(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn sign_extend(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn sign_extend(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -409,7 +416,7 @@ pub fn sign_extend(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn sdiv(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn sdiv(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let mut first = pop(stack)?;
     let mut second = pop(stack)?;
 
@@ -434,7 +441,7 @@ pub fn sdiv(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn smod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn smod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let mut first = pop(stack)?;
     let mut second = pop(stack)?;
 
@@ -459,7 +466,7 @@ pub fn smod(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn lt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn lt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -473,7 +480,7 @@ pub fn lt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn gt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn gt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -487,7 +494,7 @@ pub fn gt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn slt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn slt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -510,7 +517,7 @@ pub fn slt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn sgt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn sgt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -533,7 +540,7 @@ pub fn sgt(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn eq(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn eq(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -547,7 +554,7 @@ pub fn eq(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn iszero(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn iszero(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let item = pop(stack)?;
 
     let result = if item.is_zero() {
@@ -560,7 +567,7 @@ pub fn iszero(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn not(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn not(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let item = pop(stack)?;
     let result = !item;
 
@@ -568,7 +575,7 @@ pub fn not(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn and(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn and(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -578,7 +585,7 @@ pub fn and(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn or(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn or(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -588,7 +595,7 @@ pub fn or(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn xor(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn xor(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -598,7 +605,7 @@ pub fn xor(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn shl(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn shl(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -608,7 +615,7 @@ pub fn shl(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn shr(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn shr(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -618,7 +625,7 @@ pub fn shr(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn sar(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn sar(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
     let second = pop(stack)?;
 
@@ -641,7 +648,7 @@ pub fn sar(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn byte(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
+fn byte(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     let i = pop(stack)?;
     let x = pop(stack)?;
 
@@ -660,7 +667,7 @@ pub fn byte(stack: &mut Vec<U256>) -> Result<U256, ExecutionError> {
     Ok(result)
 }
 
-pub fn duplicate(stack: &mut Vec<U256>, duplicated_index: usize) -> Result<U256, ExecutionError> {
+fn duplicate(stack: &mut Vec<U256>, duplicated_index: usize) -> Result<U256, ExecutionError> {
     let mut ignored = vec![];
     // pop all preceding values from the stack.
     for _ in 0..duplicated_index - 1 {
@@ -683,7 +690,7 @@ pub fn duplicate(stack: &mut Vec<U256>, duplicated_index: usize) -> Result<U256,
     Ok(duplicated_data)
 }
 
-pub fn swap(stack: &mut Vec<U256>, swap_data_index: usize) -> Result<U256, ExecutionError> {
+fn swap(stack: &mut Vec<U256>, swap_data_index: usize) -> Result<U256, ExecutionError> {
     let first = pop(stack)?;
 
     let mut ignored_values = vec![];
@@ -708,7 +715,7 @@ pub fn swap(stack: &mut Vec<U256>, swap_data_index: usize) -> Result<U256, Execu
     Ok(swap_data)
 }
 
-pub fn jump(counter: U256, code: &[u8], pc: &mut usize) -> Result<U256, ExecutionError> {
+fn jump(counter: U256, code: &[u8], pc: &mut usize) -> Result<U256, ExecutionError> {
     let is_valid = is_valid_jumpdest(counter, code)?;
     if is_valid {
         *pc = counter.as_usize();
@@ -718,14 +725,14 @@ pub fn jump(counter: U256, code: &[u8], pc: &mut usize) -> Result<U256, Executio
     }
 }
 
-pub fn mstore(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+fn mstore(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
     let offset = pop(stack)?;
     let word = pop(stack)?;
 
     memory.save_word(offset.as_usize(), word)
 }
 
-pub fn mload(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+fn mload(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
     let offset = pop(stack)?;
     let word = memory.get_word(offset.as_usize())?;
 
@@ -733,7 +740,7 @@ pub fn mload(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, Executi
     Ok(word.into())
 }
 
-pub fn mstore8(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+fn mstore8(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
     let offset = pop(stack)?;
     let value = pop(stack)?;
 
@@ -741,4 +748,16 @@ pub fn mstore8(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, Execu
 
     memory.save_byte(offset.as_usize(), value_bytes[31])?;
     Ok(value)
+}
+
+fn sha3(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+    let offset = pop(stack)?.as_usize();
+    let size = pop(stack)?.as_usize();
+
+    let value = &memory.store()[offset..(offset + size)];
+
+    let result = U256::from_big_endian(&sha3_hash(&value));
+
+    stack.push(result);
+    Ok(result)
 }
