@@ -1,4 +1,5 @@
 /// Tx data.
+#[derive(Default)]
 pub struct TxData {
     pub to: Vec<u8>,
     pub from: Vec<u8>,
@@ -8,17 +9,13 @@ pub struct TxData {
 impl TxData {
     pub fn new(tx_data: Vec<Vec<u8>>) -> TxData {
         if !tx_data.is_empty() {
-            Self {
+            return Self {
                 to: tx_data[0].clone(),
                 from: tx_data[1].clone(),
                 origin: tx_data[2].clone(),
-            }
-        } else {
-            Self {
-                to: vec![],
-                from: vec![],
-                origin: vec![],
-            }
+            };
         }
+
+        Self::default()
     }
 }
