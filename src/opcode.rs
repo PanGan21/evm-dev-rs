@@ -52,6 +52,7 @@ opcodes! {
     Jump(86),
     Jumpi(87),
     Pc(88),
+    Msize(89),
     Gas(90),
     Jumpdest(91),
     Push0(95),

@@ -44,6 +44,10 @@ impl Memory {
         Ok(byte)
     }
 
+    pub fn size(&self) -> usize {
+        self.store.len()
+    }
+
     fn resize(&mut self, offset: usize, size: usize) -> Result<(), ExecutionError> {
         if self.store.len() < offset + size {
             let resize_value = (offset + size - 1) / 32 + 1;
