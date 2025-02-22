@@ -268,6 +268,12 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Gasprice => {
+                let value = U256::from_big_endian(&self.tx_data.gasprice);
+                self.stack.push(value);
+
+                Ok(())
+            }
             OpCode::Origin => {
                 let value = U256::from_big_endian(&self.tx_data.origin);
                 self.stack.push(value);

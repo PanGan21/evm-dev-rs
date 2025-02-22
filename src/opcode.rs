@@ -49,6 +49,7 @@ opcodes! {
     Address(48),
     Origin(50),
     Caller(51),
+    Gasprice(58),
     Pop(80),
     Mload(81),
     Mstore(82),

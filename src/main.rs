@@ -24,6 +24,7 @@ struct TxDataRaw {
     to: Option<String>,
     from: Option<String>,
     origin: Option<String>,
+    gasprice: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -64,7 +65,13 @@ fn main() {
                 ))
                 .unwrap();
 
-                vec![to, from, origin]
+                let gasprice = hex::decode(format!(
+                    "{:0>64}",
+                    &tx.gasprice.as_ref().unwrap_or(&String::from("aa"))[2..]
+                ))
+                .unwrap();
+
+                vec![to, from, origin, gasprice]
             }
             None => vec![],
         };
