@@ -11,6 +11,7 @@ struct EvmTest {
     code: Code,
     expect: Expect,
     tx: Option<TxDataRaw>,
+    block: Option<BlockDataRaw>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -25,6 +26,11 @@ struct TxDataRaw {
     from: Option<String>,
     origin: Option<String>,
     gasprice: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BlockDataRaw {
+    basefee: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -76,7 +82,21 @@ fn main() {
             None => vec![],
         };
 
-        let result = evm(code, tx);
+        let block = match &test.block {
+            Some(block) => {
+                // [2..] is necessary to delete the initial 0x
+                let basefee = hex::decode(format!(
+                    "{:0>64}",
+                    &block.basefee.as_ref().unwrap_or(&String::from("aa"))[2..]
+                ))
+                .unwrap();
+
+                vec![basefee]
+            }
+            None => vec![],
+        };
+
+        let result = evm(code, tx, block);
 
         let mut expected_stack: Vec<U256> = Vec::new();
         if let Some(ref stacks) = test.expect.stack {

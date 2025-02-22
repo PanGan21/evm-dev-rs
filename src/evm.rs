@@ -1,8 +1,8 @@
 use primitive_types::U256;
 
 use crate::{
-    errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory, opcode::OpCode,
-    tx::TxData, utils::sha3_hash,
+    block::BlockData, errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory,
+    opcode::OpCode, tx::TxData, utils::sha3_hash,
 };
 
 pub struct Evm {
@@ -10,15 +10,17 @@ pub struct Evm {
     pub stack: Vec<U256>,
     pub memory: Memory,
     pub tx_data: TxData,
+    pub block_data: BlockData,
 }
 
 impl Evm {
-    pub fn new(code: Box<[u8]>, stack: Vec<U256>, tx_data: TxData) -> Self {
+    pub fn new(code: Box<[u8]>, stack: Vec<U256>, tx_data: TxData, block_data: BlockData) -> Self {
         Self {
             code,
             stack,
             memory: Memory::new(),
             tx_data,
+            block_data,
         }
     }
 
@@ -270,6 +272,12 @@ impl Evm {
             }
             OpCode::Gasprice => {
                 let value = U256::from_big_endian(&self.tx_data.gasprice);
+                self.stack.push(value);
+
+                Ok(())
+            }
+            OpCode::Basefee => {
+                let value = U256::from_big_endian(&self.block_data.basefee);
                 self.stack.push(value);
 
                 Ok(())
