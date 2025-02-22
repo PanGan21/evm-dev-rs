@@ -31,6 +31,7 @@ struct TxDataRaw {
 #[derive(Debug, Deserialize)]
 struct BlockDataRaw {
     basefee: Option<String>,
+    coinbase: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -91,7 +92,13 @@ fn main() {
                 ))
                 .unwrap();
 
-                vec![basefee]
+                let coinbase = hex::decode(format!(
+                    "{:0>64}",
+                    &block.coinbase.as_ref().unwrap_or(&String::from("aa"))[2..]
+                ))
+                .unwrap();
+
+                vec![basefee, coinbase]
             }
             None => vec![],
         };

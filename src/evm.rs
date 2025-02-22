@@ -276,6 +276,12 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Coinbase => {
+                let value = U256::from_big_endian(&self.block_data.coinbase);
+                self.stack.push(value);
+
+                Ok(())
+            }
             OpCode::Basefee => {
                 let value = U256::from_big_endian(&self.block_data.basefee);
                 self.stack.push(value);

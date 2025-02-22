@@ -50,6 +50,7 @@ opcodes! {
     Origin(50),
     Caller(51),
     Gasprice(58),
+    Coinbase(65),
     Basefee(72),
     Pop(80),
     Mload(81),
