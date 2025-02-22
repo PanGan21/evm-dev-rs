@@ -37,6 +37,13 @@ impl Memory {
         Ok(value)
     }
 
+    pub fn save_byte(&mut self, offset: usize, byte: u8) -> Result<u8, ExecutionError> {
+        self.resize(offset, 1)?;
+        self.store[offset] = byte;
+
+        Ok(byte)
+    }
+
     fn resize(&mut self, offset: usize, size: usize) -> Result<(), ExecutionError> {
         if self.store.len() < offset + size {
             let resize_value = (offset + size - 1) / 32 + 1;

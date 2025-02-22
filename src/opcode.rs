@@ -48,6 +48,7 @@ opcodes! {
     Pop(80),
     Mload(81),
     Mstore(82),
+    Mstore8(83),
     Jump(86),
     Jumpi(87),
     Pc(88),

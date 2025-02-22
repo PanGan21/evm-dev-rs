@@ -252,6 +252,10 @@ impl Evm {
                 mstore(&mut self.stack, &mut self.memory)?;
                 Ok(())
             }
+            OpCode::Mstore8 => {
+                mstore8(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
             OpCode::Mload => {
                 mload(&mut self.stack, &mut self.memory)?;
                 Ok(())
@@ -722,4 +726,14 @@ pub fn mload(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, Executi
 
     stack.push(word);
     Ok(word.into())
+}
+
+pub fn mstore8(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionError> {
+    let offset = pop(stack)?;
+    let value = pop(stack)?;
+
+    let value_bytes = value.to_big_endian();
+
+    memory.save_byte(offset.as_usize(), value_bytes[31])?;
+    Ok(value)
 }
