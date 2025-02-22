@@ -1,3 +1,5 @@
+use std::vec;
+
 use evm_dev_rs::evm;
 use primitive_types::U256;
 use serde::Deserialize;
@@ -8,12 +10,18 @@ struct EvmTest {
     hint: String,
     code: Code,
     expect: Expect,
+    tx: Option<TxDataRaw>,
 }
 
 #[derive(Debug, Deserialize)]
 struct Code {
     asm: String,
     bin: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct TxDataRaw {
+    to: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -32,7 +40,22 @@ fn main() {
         println!("Test {} of {}: {}", index + 1, total, test.name);
 
         let code = hex::decode(&test.code.bin).unwrap();
-        let result = evm(code);
+
+        let tx = match &test.tx {
+            Some(tx) => {
+                // [2..] is necessary to delete the initial 0x
+                let to = hex::decode(format!(
+                    "{:0>64}",
+                    &tx.to.as_ref().unwrap_or(&String::from("aa"))[2..]
+                ))
+                .unwrap();
+
+                vec![to]
+            }
+            None => vec![],
+        };
+
+        let result = evm(code, tx);
 
         let mut expected_stack: Vec<U256> = Vec::new();
         if let Some(ref stacks) = test.expect.stack {

@@ -46,6 +46,7 @@ opcodes! {
     Shr(28),
     Sar(29),
     Sha3(32),
+    Address(48),
     Pop(80),
     Mload(81),
     Mstore(82),

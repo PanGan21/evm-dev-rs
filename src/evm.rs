@@ -2,21 +2,23 @@ use primitive_types::U256;
 
 use crate::{
     errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory, opcode::OpCode,
-    utils::sha3_hash,
+    tx::TxData, utils::sha3_hash,
 };
 
 pub struct Evm {
     pub code: Box<[u8]>,
     pub stack: Vec<U256>,
     pub memory: Memory,
+    pub tx_data: TxData,
 }
 
 impl Evm {
-    pub fn new(code: Box<[u8]>, stack: Vec<U256>) -> Self {
+    pub fn new(code: Box<[u8]>, stack: Vec<U256>, tx_data: TxData) -> Self {
         Self {
             code,
             stack,
             memory: Memory::new(),
+            tx_data,
         }
     }
 
@@ -252,6 +254,12 @@ impl Evm {
             }
             OpCode::Sha3 => {
                 sha3(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
+            OpCode::Address => {
+                let value = U256::from_big_endian(&self.tx_data.to);
+                self.stack.push(value);
+
                 Ok(())
             }
             OpCode::Gas => {
