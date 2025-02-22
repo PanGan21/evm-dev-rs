@@ -1,6 +1,7 @@
 /// Tx data.
 pub struct TxData {
     pub to: Vec<u8>,
+    pub from: Vec<u8>,
 }
 
 impl TxData {
@@ -8,9 +9,13 @@ impl TxData {
         if !tx_data.is_empty() {
             Self {
                 to: tx_data[0].clone(),
+                from: tx_data[1].clone(),
             }
         } else {
-            Self { to: vec![] }
+            Self {
+                to: vec![],
+                from: vec![],
+            }
         }
     }
 }
