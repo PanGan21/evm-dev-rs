@@ -51,6 +51,7 @@ opcodes! {
     Caller(51),
     Gasprice(58),
     Coinbase(65),
+    Timestamp(66),
     Basefee(72),
     Pop(80),
     Mload(81),
