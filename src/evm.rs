@@ -288,6 +288,12 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Number => {
+                let value = U256::from_big_endian(&self.block_data.number);
+                self.stack.push(value);
+
+                Ok(())
+            }
             OpCode::Basefee => {
                 let value = U256::from_big_endian(&self.block_data.basefee);
                 self.stack.push(value);
