@@ -54,6 +54,7 @@ opcodes! {
     Timestamp(66),
     Number(67),
     Difficulty(68),
+    Gaslimit(69),
     Basefee(72),
     Pop(80),
     Mload(81),

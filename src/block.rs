@@ -6,6 +6,7 @@ pub struct BlockData {
     pub timestamp: Vec<u8>,
     pub number: Vec<u8>,
     pub difficulty: Vec<u8>,
+    pub gaslimit: Vec<u8>,
 }
 
 impl BlockData {
@@ -17,6 +18,7 @@ impl BlockData {
                 timestamp: block_data[2].clone(),
                 number: block_data[3].clone(),
                 difficulty: block_data[4].clone(),
+                gaslimit: block_data[5].clone(),
             };
         }
 
