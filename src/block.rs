@@ -5,6 +5,7 @@ pub struct BlockData {
     pub coinbase: Vec<u8>,
     pub timestamp: Vec<u8>,
     pub number: Vec<u8>,
+    pub difficulty: Vec<u8>,
 }
 
 impl BlockData {
@@ -15,6 +16,7 @@ impl BlockData {
                 coinbase: block_data[1].clone(),
                 timestamp: block_data[2].clone(),
                 number: block_data[3].clone(),
+                difficulty: block_data[4].clone(),
             };
         }
 

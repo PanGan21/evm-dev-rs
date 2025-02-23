@@ -34,6 +34,7 @@ struct BlockDataRaw {
     coinbase: Option<String>,
     timestamp: Option<String>,
     number: Option<String>,
+    difficulty: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -112,7 +113,13 @@ fn main() {
                 ))
                 .unwrap();
 
-                vec![basefee, coinbase, timestamp, number]
+                let difficulty = hex::decode(format!(
+                    "{:0>64}",
+                    &block.difficulty.as_ref().unwrap_or(&String::from("aa"))[2..]
+                ))
+                .unwrap();
+
+                vec![basefee, coinbase, timestamp, number, difficulty]
             }
             None => vec![],
         };
