@@ -55,6 +55,7 @@ opcodes! {
     Number(67),
     Difficulty(68),
     Gaslimit(69),
+    Chainid(70),
     Basefee(72),
     Pop(80),
     Mload(81),

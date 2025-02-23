@@ -7,6 +7,7 @@ pub struct BlockData {
     pub number: Vec<u8>,
     pub difficulty: Vec<u8>,
     pub gaslimit: Vec<u8>,
+    pub chainid: Vec<u8>,
 }
 
 impl BlockData {
@@ -19,6 +20,7 @@ impl BlockData {
                 number: block_data[3].clone(),
                 difficulty: block_data[4].clone(),
                 gaslimit: block_data[5].clone(),
+                chainid: block_data[6].clone(),
             };
         }
 
