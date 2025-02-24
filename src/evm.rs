@@ -313,6 +313,10 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Blockhash => {
+                // Not used in this test suite, can return 0
+                Ok(())
+            }
             OpCode::Basefee => {
                 let value = U256::from_big_endian(&self.block_data.basefee);
                 self.stack.push(value);

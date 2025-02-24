@@ -50,6 +50,7 @@ opcodes! {
     Origin(50),
     Caller(51),
     Gasprice(58),
+    Blockhash(64),
     Coinbase(65),
     Timestamp(66),
     Number(67),
