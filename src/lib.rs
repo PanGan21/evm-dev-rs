@@ -4,13 +4,17 @@ mod evm;
 mod jumpdest;
 mod memory;
 mod opcode;
+mod state;
 mod tx;
 mod utils;
+
+use std::collections::HashMap;
 
 use crate::tx::TxData;
 use block::BlockData;
 use evm::Evm;
 use primitive_types::U256;
+use state::State;
 
 pub struct EvmResult {
     pub stack: Vec<U256>,
@@ -21,6 +25,7 @@ pub fn evm(
     _code: impl AsRef<[u8]>,
     _tx_data: Vec<Vec<u8>>,
     _block_data: Vec<Vec<u8>>,
+    _state_data: HashMap<Vec<u8>, (usize, Vec<u8>, Vec<u8>)>,
 ) -> EvmResult {
     let stack: Vec<U256> = Vec::new();
 
@@ -30,6 +35,7 @@ pub fn evm(
         stack,
         TxData::new(_tx_data),
         BlockData::new(_block_data),
+        State::new(_state_data),
     );
 
     let result = evm.execute();

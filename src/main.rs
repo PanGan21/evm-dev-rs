@@ -1,8 +1,8 @@
-use std::vec;
+use std::{collections::HashMap, vec};
 
 use evm_dev_rs::evm;
 use primitive_types::U256;
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 #[derive(Debug, Deserialize)]
 struct EvmTest {
@@ -12,12 +12,30 @@ struct EvmTest {
     expect: Expect,
     tx: Option<TxDataRaw>,
     block: Option<BlockDataRaw>,
+    #[serde(default)]
+    state: StateRaw,
 }
 
 #[derive(Debug, Deserialize)]
 struct Code {
+    #[serde(
+        default = "default_string",
+        deserialize_with = "deserialize_string_or_empty"
+    )]
     asm: String,
     bin: String,
+}
+
+fn default_string() -> String {
+    String::new() // Returns an empty string
+}
+
+fn deserialize_string_or_empty<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let opt = Option::<String>::deserialize(deserializer)?;
+    Ok(opt.unwrap_or_else(default_string))
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,6 +55,20 @@ struct BlockDataRaw {
     difficulty: Option<String>,
     gaslimit: Option<String>,
     chainid: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct StateRaw {
+    #[serde(flatten)]
+    entries: HashMap<String, AddressDataRaw>,
+}
+
+#[derive(Debug, Deserialize)]
+struct AddressDataRaw {
+    nonce: Option<String>,
+    balance: Option<String>,
+    #[serde(default)]
+    code: Option<Code>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -140,7 +172,39 @@ fn main() {
             None => vec![],
         };
 
-        let result = evm(code, tx, block);
+        let state = test
+            .state
+            .entries
+            .is_empty()
+            .then(HashMap::default)
+            .unwrap_or_else(|| {
+                test.state
+                    .entries
+                    .iter()
+                    .map(|(address, data)| {
+                        let address_bytes = hex::decode(format!("{:0>64}", &address[2..])).unwrap();
+
+                        let nonce = data
+                            .nonce
+                            .as_deref()
+                            .unwrap_or("0")
+                            .parse::<usize>()
+                            .unwrap();
+
+                        let balance = hex::decode(format!(
+                            "{:0>64}",
+                            &data.balance.as_deref().unwrap_or("0xaa")[2..]
+                        ))
+                        .unwrap();
+
+                        let code = hex::decode(data.code.as_ref().map_or("", |c| &c.bin)).unwrap();
+
+                        (address_bytes, (nonce, balance, code))
+                    })
+                    .collect::<HashMap<_, _>>()
+            });
+
+        let result = evm(code, tx, block, state);
 
         let mut expected_stack: Vec<U256> = Vec::new();
         if let Some(ref stacks) = test.expect.stack {

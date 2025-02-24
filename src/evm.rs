@@ -2,7 +2,7 @@ use primitive_types::U256;
 
 use crate::{
     block::BlockData, errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory,
-    opcode::OpCode, tx::TxData, utils::sha3_hash,
+    opcode::OpCode, state::State, tx::TxData, utils::sha3_hash,
 };
 
 pub struct Evm {
@@ -11,16 +11,24 @@ pub struct Evm {
     pub memory: Memory,
     pub tx_data: TxData,
     pub block_data: BlockData,
+    pub state: State,
 }
 
 impl Evm {
-    pub fn new(code: Box<[u8]>, stack: Vec<U256>, tx_data: TxData, block_data: BlockData) -> Self {
+    pub fn new(
+        code: Box<[u8]>,
+        stack: Vec<U256>,
+        tx_data: TxData,
+        block_data: BlockData,
+        state: State,
+    ) -> Self {
         Self {
             code,
             stack,
             memory: Memory::new(),
             tx_data,
             block_data,
+            state,
         }
     }
 
@@ -261,6 +269,11 @@ impl Evm {
             OpCode::Address => {
                 let value = U256::from_big_endian(&self.tx_data.to);
                 self.stack.push(value);
+
+                Ok(())
+            }
+            OpCode::Balance => {
+                balance(&mut self.stack, &self.state)?;
 
                 Ok(())
             }
@@ -835,4 +848,12 @@ fn sha3(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionErr
 
     stack.push(result);
     Ok(result)
+}
+
+pub fn balance(stack: &mut Vec<U256>, state: &State) -> Result<U256, ExecutionError> {
+    let address = pop(stack)?;
+    let balance = state.get_balance(address);
+
+    stack.push(balance);
+    Ok(balance)
 }

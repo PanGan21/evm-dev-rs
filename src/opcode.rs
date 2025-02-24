@@ -47,6 +47,7 @@ opcodes! {
     Sar(29),
     Sha3(32),
     Address(48),
+    Balance(49),
     Origin(50),
     Caller(51),
     Gasprice(58),
