@@ -50,6 +50,7 @@ opcodes! {
     Balance(49),
     Origin(50),
     Caller(51),
+    Callvalue(52),
     Gasprice(58),
     Blockhash(64),
     Coinbase(65),
