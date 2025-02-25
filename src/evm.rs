@@ -289,6 +289,11 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Calldataload => {
+                calldataload(&mut self.stack, &self.tx_data.data)?;
+
+                Ok(())
+            }
             OpCode::Gasprice => {
                 let value = U256::from_big_endian(&self.tx_data.gasprice);
                 self.stack.push(value);
@@ -862,4 +867,25 @@ pub fn balance(stack: &mut Vec<U256>, state: &State) -> Result<U256, ExecutionEr
 
     stack.push(balance);
     Ok(balance)
+}
+
+pub fn calldataload(stack: &mut Vec<U256>, data: &Vec<u8>) -> Result<U256, ExecutionError> {
+    let index = pop(stack)?;
+
+    let mut copied_data = [0u8; 32];
+
+    // check if offset is within bounds of data
+    if index < data.len().into() {
+        let available_data = &data[index.as_usize()..];
+
+        // calculate the actual copy size based on available data
+        let copy_size = std::cmp::min(32, available_data.len());
+
+        copied_data[..copy_size].copy_from_slice(&available_data[..copy_size]);
+    }
+
+    let value = U256::from_big_endian(&copied_data);
+    stack.push(value);
+
+    Ok(value)
 }

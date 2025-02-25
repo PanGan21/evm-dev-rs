@@ -6,6 +6,7 @@ pub struct TxData {
     pub origin: Vec<u8>,
     pub gasprice: Vec<u8>,
     pub value: Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl TxData {
@@ -17,6 +18,7 @@ impl TxData {
                 origin: tx_data[2].clone(),
                 gasprice: tx_data[3].clone(),
                 value: tx_data[4].clone(),
+                data: tx_data[5].clone(),
             };
         }
 
