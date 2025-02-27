@@ -294,6 +294,12 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Calldatasize => {
+                let size = self.tx_data.data.len();
+                self.stack.push(size.into());
+
+                Ok(())
+            }
             OpCode::Gasprice => {
                 let value = U256::from_big_endian(&self.tx_data.gasprice);
                 self.stack.push(value);
