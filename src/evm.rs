@@ -311,6 +311,11 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Codecopy => {
+                copy_data_to_memory(&mut self.stack, &mut self.memory, &self.code)?;
+
+                Ok(())
+            }
             OpCode::Gasprice => {
                 let value = U256::from_big_endian(&self.tx_data.gasprice);
                 self.stack.push(value);

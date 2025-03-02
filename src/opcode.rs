@@ -55,6 +55,7 @@ opcodes! {
     Calldatasize(54),
     Calldatacopy(55),
     Codesize(56),
+    Codecopy(57),
     Gasprice(58),
     Blockhash(64),
     Coinbase(65),
