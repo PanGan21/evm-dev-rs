@@ -300,6 +300,11 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Calldatacopy => {
+                copy_data_to_memory(&mut self.stack, &mut self.memory, &self.tx_data.data)?;
+
+                Ok(())
+            }
             OpCode::Gasprice => {
                 let value = U256::from_big_endian(&self.tx_data.gasprice);
                 self.stack.push(value);
@@ -894,4 +899,34 @@ pub fn calldataload(stack: &mut Vec<U256>, data: &Vec<u8>) -> Result<U256, Execu
     stack.push(value);
 
     Ok(value)
+}
+
+fn copy_data_to_memory(
+    stack: &mut Vec<U256>,
+    memory: &mut Memory,
+    data: &[u8],
+) -> Result<(), ExecutionError> {
+    let dest = pop(stack)?.as_usize();
+    let offset = pop(stack)?.as_usize();
+    let size = pop(stack)?.as_usize();
+
+    let mut copied_data = vec![0; size];
+
+    // check if offset is within bounds of data
+    if offset < data.len() {
+        // calculate the amount of data available to copy
+        let available_data = &data[offset..];
+
+        // calculate the actual copy size based on available data
+        let copy_size = std::cmp::min(size, available_data.len());
+
+        // copy available data to the destination
+        copied_data[..copy_size].copy_from_slice(&available_data[..copy_size]);
+    }
+
+    for (i, byte) in copied_data.iter().enumerate() {
+        memory.save_byte(dest + i, *byte)?;
+    }
+
+    Ok(())
 }
