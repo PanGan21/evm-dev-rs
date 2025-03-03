@@ -16,6 +16,7 @@ impl State {
                 address: U256::from_big_endian(&address),
                 data: AddressData {
                     balance: U256::from_big_endian(&data.1),
+                    code: data.2,
                 },
             };
             entries.push(state_data);
@@ -30,6 +31,14 @@ impl State {
             .map(|s| s.data.balance.clone())
             .unwrap_or_default()
     }
+
+    pub fn get_code(&self, address: U256) -> Vec<u8> {
+        self.entries
+            .iter()
+            .find(|s| s.address == address)
+            .map(|s| s.data.code.clone())
+            .unwrap_or_default()
+    }
 }
 
 #[derive(Debug)]
@@ -41,4 +50,5 @@ pub struct StateData {
 #[derive(Debug)]
 pub struct AddressData {
     pub balance: U256,
+    pub code: Vec<u8>,
 }
