@@ -337,6 +337,14 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Extcodehash => {
+                let address = pop(&mut self.stack)?;
+                let code = self.state.get_code(address);
+                let result = U256::from_big_endian(&sha3_hash(&code));
+                self.stack.push(result);
+
+                Ok(())
+            }
             OpCode::Coinbase => {
                 let value = U256::from_big_endian(&self.block_data.coinbase);
                 self.stack.push(value);

@@ -59,6 +59,7 @@ opcodes! {
     Gasprice(58),
     Extcodesize(59),
     Extcodecopy(60),
+    Extcodehash(63),
     Blockhash(64),
     Coinbase(65),
     Timestamp(66),
