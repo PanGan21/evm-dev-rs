@@ -382,6 +382,14 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Selfbalance => {
+                let balance = self
+                    .state
+                    .get_balance(U256::from_big_endian(&self.tx_data.to));
+                self.stack.push(balance);
+
+                Ok(())
+            }
             OpCode::Blockhash => {
                 // Not used in this test suite, can return 0
                 Ok(())

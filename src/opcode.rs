@@ -67,6 +67,7 @@ opcodes! {
     Difficulty(68),
     Gaslimit(69),
     Chainid(70),
+    Selfbalance(71),
     Basefee(72),
     Pop(80),
     Mload(81),
