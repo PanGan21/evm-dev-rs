@@ -330,6 +330,13 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Extcodecopy => {
+                let address = pop(&mut self.stack)?;
+                let code = self.state.get_code(address);
+                copy_data_to_memory(&mut self.stack, &mut self.memory, &code)?;
+
+                Ok(())
+            }
             OpCode::Coinbase => {
                 let value = U256::from_big_endian(&self.block_data.coinbase);
                 self.stack.push(value);
