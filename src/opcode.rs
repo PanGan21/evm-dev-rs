@@ -146,6 +146,7 @@ opcodes! {
     Swap14(157),
     Swap15(158),
     Swap16(159),
+    Log0(160),
 }
 
 impl OpCode {
@@ -222,5 +223,13 @@ impl OpCode {
 
     pub fn is_push(&self) -> bool {
         OpCode::Push0 <= *self && *self <= OpCode::Push32
+    }
+
+    /// Helper function to determine the number of topics of a `LOG` opcode
+    pub fn topics(&self) -> usize {
+        match self {
+            OpCode::Log0 => 0,
+            _ => 0, // return 0 for non-`LOG`
+        }
     }
 }

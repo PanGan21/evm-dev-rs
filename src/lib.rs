@@ -2,6 +2,7 @@ mod block;
 mod errors;
 mod evm;
 mod jumpdest;
+mod log;
 mod memory;
 mod opcode;
 mod state;
@@ -18,9 +19,12 @@ use primitive_types::U256;
 use state::State;
 use storage::Storage;
 
+pub use log::Log;
+
 pub struct EvmResult {
     pub stack: Vec<U256>,
     pub success: bool,
+    pub logs: Vec<Log>,
 }
 
 pub fn evm(
@@ -39,6 +43,7 @@ pub fn evm(
         BlockData::new(_block_data),
         State::new(_state_data),
         Storage::new(),
+        vec![],
     );
 
     let result = evm.execute();
@@ -46,14 +51,17 @@ pub fn evm(
         evm::ExecutionResult::Success => EvmResult {
             stack: evm.stack(),
             success: true,
+            logs: evm.logs,
         },
         evm::ExecutionResult::Halt => EvmResult {
             stack: evm.stack(),
             success: true,
+            logs: evm.logs,
         },
         evm::ExecutionResult::Revert => EvmResult {
             stack: evm.stack(),
             success: false,
+            logs: evm.logs,
         },
     }
 }

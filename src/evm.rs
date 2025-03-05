@@ -1,8 +1,8 @@
 use primitive_types::U256;
 
 use crate::{
-    block::BlockData, errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory,
-    opcode::OpCode, state::State, storage::Storage, tx::TxData, utils::sha3_hash,
+    block::BlockData, errors::ExecutionError, jumpdest::is_valid_jumpdest, log::Log,
+    memory::Memory, opcode::OpCode, state::State, storage::Storage, tx::TxData, utils::sha3_hash,
 };
 
 pub struct Evm {
@@ -13,6 +13,7 @@ pub struct Evm {
     pub block_data: BlockData,
     pub state: State,
     pub storage: Storage,
+    pub logs: Vec<Log>,
 }
 
 impl Evm {
@@ -23,6 +24,7 @@ impl Evm {
         block_data: BlockData,
         state: State,
         storage: Storage,
+        logs: Vec<Log>,
     ) -> Self {
         Self {
             code,
@@ -32,6 +34,7 @@ impl Evm {
             block_data,
             state,
             storage,
+            logs,
         }
     }
 
@@ -446,6 +449,17 @@ impl Evm {
             }
             OpCode::Mload => {
                 mload(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
+            OpCode::Log0 => {
+                let x = opcode.topics();
+                logx(
+                    x,
+                    &mut self.stack,
+                    &mut self.memory,
+                    &self.tx_data.to,
+                    &mut self.logs,
+                )?;
                 Ok(())
             }
         }
@@ -993,6 +1007,30 @@ fn copy_data_to_memory(
     for (i, byte) in copied_data.iter().enumerate() {
         memory.save_byte(dest + i, *byte)?;
     }
+
+    Ok(())
+}
+
+pub fn logx(
+    x: usize,
+    stack: &mut Vec<U256>,
+    memory: &mut Memory,
+    address: &[u8],
+    logs: &mut Vec<Log>,
+) -> Result<(), ExecutionError> {
+    let offset = pop(stack)?.as_usize();
+    let size = pop(stack)?.as_usize();
+    let mut topics = vec![];
+
+    for _ in 0..x {
+        let topic = pop(stack)?;
+        topics.push(topic);
+    }
+
+    let data = memory.get_bytes(offset, size)?;
+
+    let log = Log::new(U256::from_big_endian(address), data, topics);
+    logs.push(log);
 
     Ok(())
 }

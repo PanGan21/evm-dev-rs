@@ -52,6 +52,20 @@ impl Memory {
         &self.store
     }
 
+    pub fn get_bytes(&mut self, offset: usize, n_bytes: usize) -> Result<Vec<u8>, ExecutionError> {
+        let mut bytes = vec![];
+        for i in 0..n_bytes {
+            let current_offset = offset + i;
+            self.resize(current_offset, 1)?;
+
+            let byte = *self.store.get(current_offset).unwrap_or(&0);
+
+            bytes.push(byte);
+        }
+
+        Ok(bytes)
+    }
+
     fn resize(&mut self, offset: usize, size: usize) -> Result<(), ExecutionError> {
         if self.store.len() < offset + size {
             let resize_value = (offset + size - 1) / 32 + 1;
