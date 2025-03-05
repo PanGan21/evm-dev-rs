@@ -2,7 +2,7 @@ use primitive_types::U256;
 
 use crate::{
     block::BlockData, errors::ExecutionError, jumpdest::is_valid_jumpdest, memory::Memory,
-    opcode::OpCode, state::State, tx::TxData, utils::sha3_hash,
+    opcode::OpCode, state::State, storage::Storage, tx::TxData, utils::sha3_hash,
 };
 
 pub struct Evm {
@@ -12,6 +12,7 @@ pub struct Evm {
     pub tx_data: TxData,
     pub block_data: BlockData,
     pub state: State,
+    pub storage: Storage,
 }
 
 impl Evm {
@@ -21,6 +22,7 @@ impl Evm {
         tx_data: TxData,
         block_data: BlockData,
         state: State,
+        storage: Storage,
     ) -> Self {
         Self {
             code,
@@ -29,6 +31,7 @@ impl Evm {
             tx_data,
             block_data,
             state,
+            storage,
         }
     }
 
@@ -418,6 +421,27 @@ impl Evm {
             }
             OpCode::Mstore8 => {
                 mstore8(&mut self.stack, &mut self.memory)?;
+                Ok(())
+            }
+            OpCode::Sload => {
+                let key = pop(&mut self.stack)?;
+                let value = self
+                    .storage
+                    .load_slot(U256::from_big_endian(&self.tx_data.to), key);
+
+                self.stack.push(value);
+                Ok(())
+            }
+            OpCode::Sstore => {
+                let key = pop(&mut self.stack)?;
+                let value = pop(&mut self.stack)?;
+
+                self.storage.set_constract_slot(
+                    U256::from_big_endian(&self.tx_data.to),
+                    key,
+                    value,
+                );
+
                 Ok(())
             }
             OpCode::Mload => {

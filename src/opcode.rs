@@ -73,6 +73,8 @@ opcodes! {
     Mload(81),
     Mstore(82),
     Mstore8(83),
+    Sload(84),
+    Sstore(85),
     Jump(86),
     Jumpi(87),
     Pc(88),

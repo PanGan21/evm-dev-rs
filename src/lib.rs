@@ -5,6 +5,7 @@ mod jumpdest;
 mod memory;
 mod opcode;
 mod state;
+mod storage;
 mod tx;
 mod utils;
 
@@ -15,6 +16,7 @@ use block::BlockData;
 use evm::Evm;
 use primitive_types::U256;
 use state::State;
+use storage::Storage;
 
 pub struct EvmResult {
     pub stack: Vec<U256>,
@@ -36,6 +38,7 @@ pub fn evm(
         TxData::new(_tx_data),
         BlockData::new(_block_data),
         State::new(_state_data),
+        Storage::new(),
     );
 
     let result = evm.execute();
