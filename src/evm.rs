@@ -451,7 +451,7 @@ impl Evm {
                 mload(&mut self.stack, &mut self.memory)?;
                 Ok(())
             }
-            OpCode::Log0 | OpCode::Log1 | OpCode::Log2 => {
+            OpCode::Log0 | OpCode::Log1 | OpCode::Log2 | OpCode::Log3 => {
                 let x = opcode.topics();
                 logx(
                     x,

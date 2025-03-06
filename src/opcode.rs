@@ -149,6 +149,7 @@ opcodes! {
     Log0(160),
     Log1(161),
     Log2(162),
+    Log3(163),
 }
 
 impl OpCode {
@@ -233,6 +234,7 @@ impl OpCode {
             OpCode::Log0 => 0,
             OpCode::Log1 => 1,
             OpCode::Log2 => 2,
+            OpCode::Log3 => 3,
             _ => 0, // return 0 for non-`LOG`
         }
     }
