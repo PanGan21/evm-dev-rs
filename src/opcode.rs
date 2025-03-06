@@ -148,6 +148,7 @@ opcodes! {
     Swap16(159),
     Log0(160),
     Log1(161),
+    Log2(162),
 }
 
 impl OpCode {
@@ -231,6 +232,7 @@ impl OpCode {
         match self {
             OpCode::Log0 => 0,
             OpCode::Log1 => 1,
+            OpCode::Log2 => 2,
             _ => 0, // return 0 for non-`LOG`
         }
     }
