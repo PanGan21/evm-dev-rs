@@ -147,6 +147,7 @@ opcodes! {
     Swap15(158),
     Swap16(159),
     Log0(160),
+    Log1(161),
 }
 
 impl OpCode {
@@ -229,6 +230,7 @@ impl OpCode {
     pub fn topics(&self) -> usize {
         match self {
             OpCode::Log0 => 0,
+            OpCode::Log1 => 1,
             _ => 0, // return 0 for non-`LOG`
         }
     }
