@@ -14,6 +14,7 @@ pub struct Evm {
     pub state: State,
     pub storage: Storage,
     pub logs: Vec<Log>,
+    pub return_data: Vec<u8>,
 }
 
 impl Evm {
@@ -25,6 +26,7 @@ impl Evm {
         state: State,
         storage: Storage,
         logs: Vec<Log>,
+        return_data: Vec<u8>,
     ) -> Self {
         Self {
             code,
@@ -35,6 +37,7 @@ impl Evm {
             state,
             storage,
             logs,
+            return_data,
         }
     }
 
@@ -462,12 +465,30 @@ impl Evm {
                 )?;
                 Ok(())
             }
+            OpCode::Return => {
+                let offset = pop(&mut self.stack)?.as_usize();
+                let size = pop(&mut self.stack)?.as_usize();
+
+                let data = self.memory.get_bytes(offset, size)?;
+                self.return_data = data;
+
+                Ok(())
+            }
         }
     }
 
     /// Returns the stack at the end of execution. Note that the stack here is reversed.
     pub fn stack(&self) -> Vec<U256> {
         self.stack.iter().rev().cloned().collect()
+    }
+
+    /// Returns the logs at the end of execution.
+    pub fn logs(&self) -> Vec<Log> {
+        self.logs.iter().rev().cloned().collect()
+    }
+
+    pub fn return_data(&self) -> Vec<u8> {
+        self.return_data.clone()
     }
 }
 

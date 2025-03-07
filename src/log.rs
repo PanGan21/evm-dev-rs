@@ -1,6 +1,6 @@
 use primitive_types::U256;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Log {
     pub address: U256,
     pub data: Vec<u8>,

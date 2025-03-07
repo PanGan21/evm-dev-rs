@@ -151,6 +151,7 @@ opcodes! {
     Log2(162),
     Log3(163),
     Log4(164),
+    Return(243),
 }
 
 impl OpCode {
