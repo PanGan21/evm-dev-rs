@@ -46,6 +46,7 @@ pub fn evm(
         Storage::new(),
         vec![],
         vec![],
+        vec![],
     );
 
     let result = evm.execute();

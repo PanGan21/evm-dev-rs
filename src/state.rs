@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use primitive_types::U256;
 
 // State
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct State {
     pub entries: Vec<StateData>,
 }
@@ -41,13 +41,13 @@ impl State {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StateData {
     pub address: U256,
     pub data: AddressData,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AddressData {
     pub balance: U256,
     pub code: Vec<u8>,

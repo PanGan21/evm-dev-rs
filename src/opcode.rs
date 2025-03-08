@@ -151,6 +151,7 @@ opcodes! {
     Log2(162),
     Log3(163),
     Log4(164),
+    Call(241),
     Return(243),
     Revert(253),
 }
