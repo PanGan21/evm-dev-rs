@@ -12,4 +12,6 @@ pub enum ExecutionError {
     StackUnderflow,
     #[error("integer underflow")]
     IntegerOverflow,
+    #[error("revert opcode")]
+    Revert,
 }

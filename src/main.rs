@@ -302,6 +302,7 @@ fn main() {
             println!("Expected return data:");
             println!("{:#?}", expected_ret);
 
+            println!("]\n");
             println!("Actual success: {:?}", result.success);
             println!("Actual stack: [");
             for v in result.stack {
@@ -312,8 +313,8 @@ fn main() {
             for l in result.logs {
                 println!("  {:#?},", l);
             }
-            println!("]\n");
 
+            println!("]\n");
             println!("Actual return data:");
             println!("{:#?}", result.ret);
 

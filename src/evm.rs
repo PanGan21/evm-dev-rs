@@ -466,13 +466,15 @@ impl Evm {
                 Ok(())
             }
             OpCode::Return => {
-                let offset = pop(&mut self.stack)?.as_usize();
-                let size = pop(&mut self.stack)?.as_usize();
-
-                let data = self.memory.get_bytes(offset, size)?;
-                self.return_data = data;
+                return_func(&mut self.stack, &mut self.memory, &mut self.return_data)?;
 
                 Ok(())
+            }
+            OpCode::Revert => {
+                return_func(&mut self.stack, &mut self.memory, &mut self.return_data)?;
+                self.stack.clear();
+
+                Err(ExecutionError::Revert)
             }
         }
     }
@@ -1052,6 +1054,20 @@ pub fn logx(
 
     let log = Log::new(U256::from_big_endian(address), data, topics);
     logs.push(log);
+
+    Ok(())
+}
+
+pub fn return_func(
+    stack: &mut Vec<U256>,
+    memory: &mut Memory,
+    return_data: &mut Vec<u8>,
+) -> Result<(), ExecutionError> {
+    let offset = pop(stack)?.as_usize();
+    let size = pop(stack)?.as_usize();
+
+    let data = memory.get_bytes(offset, size)?;
+    *return_data = data;
 
     Ok(())
 }
