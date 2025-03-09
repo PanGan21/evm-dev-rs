@@ -349,6 +349,12 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Returndatasize => {
+                let size = self.last_return_data.len();
+                self.stack.push(size.into());
+
+                Ok(())
+            }
             OpCode::Extcodehash => {
                 let address = pop(&mut self.stack)?;
                 let code = self.state.get_code(address);
