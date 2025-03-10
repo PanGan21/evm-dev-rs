@@ -60,6 +60,7 @@ opcodes! {
     Extcodesize(59),
     Extcodecopy(60),
     Returndatasize(61),
+    Returndatacopy(62),
     Extcodehash(63),
     Blockhash(64),
     Coinbase(65),

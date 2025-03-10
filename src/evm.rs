@@ -355,6 +355,11 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Returndatacopy => {
+                copy_data_to_memory(&mut self.stack, &mut self.memory, &self.last_return_data)?;
+
+                Ok(())
+            }
             OpCode::Extcodehash => {
                 let address = pop(&mut self.stack)?;
                 let code = self.state.get_code(address);
