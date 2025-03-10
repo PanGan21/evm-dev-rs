@@ -497,6 +497,21 @@ impl Evm {
 
                 Ok(())
             }
+            OpCode::Delegatecall => {
+                delegatecall(
+                    &mut self.stack,
+                    &mut self.memory,
+                    &mut self.state,
+                    &mut self.storage,
+                    &self.tx_data.to,
+                    &self.tx_data.from,
+                    &self.tx_data.origin,
+                    &self.tx_data.value,
+                    &mut self.last_return_data,
+                )?;
+
+                Ok(())
+            }
             OpCode::Revert => {
                 return_func(&mut self.stack, &mut self.memory, &mut self.return_data)?;
                 self.stack.clear();
@@ -1136,6 +1151,69 @@ pub fn call(
         tx_origin.to_vec(),
         vec![],
         value_bytes.to_vec(),
+        calldata,
+    ]);
+
+    let block_data = BlockData::new(vec![]);
+
+    let mut new_evm = Evm::new(
+        Box::from(code),
+        vec![],
+        tx_data,
+        block_data,
+        state.clone(),
+        storage.clone(),
+        vec![],
+        vec![],
+        vec![],
+    );
+
+    let result = new_evm.execute();
+
+    memory.save_bytes(ret_offset, &new_evm.return_data())?;
+    *last_ret_data = new_evm.return_data();
+
+    let res = match result {
+        ExecutionResult::Success | ExecutionResult::Halt => {
+            *state = new_evm.state();
+            *storage = new_evm.storage();
+            1.into()
+        }
+        ExecutionResult::Revert => 0.into(),
+    };
+
+    stack.push(res);
+    Ok(())
+}
+
+pub fn delegatecall(
+    stack: &mut Vec<U256>,
+    memory: &mut Memory,
+    state: &mut State,
+    storage: &mut Storage,
+    tx_to: &[u8],
+    tx_from: &[u8],
+    tx_origin: &[u8],
+    value: &[u8],
+    last_ret_data: &mut Vec<u8>,
+) -> Result<(), ExecutionError> {
+    let _gas = pop(stack)?;
+    let address = pop(stack)?;
+
+    let args_offset = pop(stack)?.as_usize();
+    let args_size = pop(stack)?.as_usize();
+    let ret_offset = pop(stack)?.as_usize();
+    let _ret_size = pop(stack)?.as_usize();
+
+    let code = state.get_code(address);
+    let calldata = memory.get_bytes(args_offset, args_size)?;
+
+    let tx_data = TxData::new(vec![
+        tx_to.to_vec(),
+        tx_from.to_vec(),
+        tx_origin.to_vec(),
+        vec![],
+        value.to_vec(),
         calldata,
     ]);
 

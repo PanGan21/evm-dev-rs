@@ -155,6 +155,7 @@ opcodes! {
     Log4(164),
     Call(241),
     Return(243),
+    Delegatecall(244),
     Revert(253),
 }
 
