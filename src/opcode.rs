@@ -156,6 +156,7 @@ opcodes! {
     Call(241),
     Return(243),
     Delegatecall(244),
+    Staticcall(250),
     Revert(253),
 }
 

@@ -14,4 +14,6 @@ pub enum ExecutionError {
     IntegerOverflow,
     #[error("revert opcode")]
     Revert,
+    #[error("execution is read only")]
+    ReadOnly,
 }

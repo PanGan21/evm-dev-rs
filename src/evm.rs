@@ -16,6 +16,7 @@ pub struct Evm {
     pub logs: Vec<Log>,
     pub return_data: Vec<u8>,
     pub last_return_data: Vec<u8>,
+    read_only: bool,
 }
 
 impl Evm {
@@ -29,6 +30,7 @@ impl Evm {
         logs: Vec<Log>,
         return_data: Vec<u8>,
         last_return_data: Vec<u8>,
+        read_only: bool,
     ) -> Self {
         Self {
             code,
@@ -41,6 +43,7 @@ impl Evm {
             logs,
             return_data,
             last_return_data,
+            read_only,
         }
     }
 
@@ -448,7 +451,12 @@ impl Evm {
                 Ok(())
             }
             OpCode::Sstore => {
-                sstore(&mut self.stack, &mut self.storage, &self.tx_data.to)?;
+                sstore(
+                    &mut self.stack,
+                    &mut self.storage,
+                    &self.tx_data.to,
+                    self.read_only,
+                )?;
                 Ok(())
             }
             OpCode::Mload => {
@@ -463,6 +471,7 @@ impl Evm {
                     &mut self.memory,
                     &self.tx_data.to,
                     &mut self.logs,
+                    self.read_only,
                 )?;
                 Ok(())
             }
@@ -475,6 +484,7 @@ impl Evm {
                     &self.tx_data.to,
                     &self.tx_data.origin,
                     &mut self.last_return_data,
+                    self.read_only,
                 )?;
 
                 Ok(())
@@ -497,6 +507,19 @@ impl Evm {
                     &mut self.last_return_data,
                 )?;
 
+                Ok(())
+            }
+            OpCode::Staticcall => {
+                staticcall(
+                    &mut self.stack,
+                    &mut self.memory,
+                    &mut self.state,
+                    &mut self.storage,
+                    &self.tx_data.to,
+                    &self.tx_data.origin,
+                    &self.tx_data.data,
+                    &mut self.last_return_data,
+                )?;
                 Ok(())
             }
             OpCode::Revert => {
@@ -1016,7 +1039,12 @@ fn sstore(
     stack: &mut Vec<U256>,
     storage: &mut Storage,
     address: &[u8],
+    read_only: bool,
 ) -> Result<U256, ExecutionError> {
+    if read_only {
+        return Err(ExecutionError::ReadOnly);
+    }
+
     let key = pop(stack)?;
     let value = pop(stack)?;
 
@@ -1101,7 +1129,12 @@ pub fn logx(
     memory: &mut Memory,
     address: &[u8],
     logs: &mut Vec<Log>,
+    read_only: bool,
 ) -> Result<(), ExecutionError> {
+    if read_only {
+        return Err(ExecutionError::ReadOnly);
+    }
+
     let offset = pop(stack)?.as_usize();
     let size = pop(stack)?.as_usize();
     let mut topics = vec![];
@@ -1141,10 +1174,15 @@ pub fn call(
     tx_to: &[u8],
     tx_origin: &[u8],
     last_ret_data: &mut Vec<u8>,
+    read_only: bool,
 ) -> Result<(), ExecutionError> {
     let _gas = pop(stack)?;
     let address = pop(stack)?;
     let value = pop(stack)?;
+
+    if read_only && !value.is_zero() {
+        return Err(ExecutionError::ReadOnly);
+    }
 
     let args_offset = pop(stack)?.as_usize();
     let args_size = pop(stack)?.as_usize();
@@ -1177,6 +1215,7 @@ pub fn call(
         vec![],
         vec![],
         vec![],
+        false,
     );
 
     let result = new_evm.execute();
@@ -1240,6 +1279,7 @@ pub fn delegatecall(
         vec![],
         vec![],
         vec![],
+        false,
     );
 
     let result = new_evm.execute();
@@ -1258,4 +1298,65 @@ pub fn delegatecall(
 
     stack.push(res);
     Ok(())
+}
+
+pub fn staticcall(
+    stack: &mut Vec<U256>,
+    memory: &mut Memory,
+    state: &mut State,
+    storage: &mut Storage,
+    tx_to: &[u8],
+    tx_origin: &[u8],
+    tx_value: &[u8],
+    last_ret_data: &mut Vec<u8>,
+) -> Result<U256, ExecutionError> {
+    let _gas = pop(stack)?;
+    let address = pop(stack)?;
+    let args_offset = pop(stack)?.as_usize();
+    let args_size = pop(stack)?.as_usize();
+    let ret_offset = pop(stack)?.as_usize();
+    let _ret_size = pop(stack)?.as_usize();
+
+    let code = state.get_code(address);
+    let calldata = memory.get_bytes(args_offset, args_size)?;
+    let to = address.to_big_endian();
+    let tx_data = TxData::new(vec![
+        to.to_vec(),
+        tx_to.to_vec(),
+        tx_origin.to_vec(),
+        vec![],
+        tx_value.to_vec(),
+        calldata,
+    ]);
+    let block_data = BlockData::new(vec![]);
+
+    let mut new_evm = Evm::new(
+        Box::from(code),
+        vec![],
+        tx_data,
+        block_data,
+        state.clone(),
+        storage.clone(),
+        vec![],
+        vec![],
+        vec![],
+        true,
+    );
+
+    let result = new_evm.execute();
+
+    memory.save_bytes(ret_offset, &new_evm.return_data())?;
+    *last_ret_data = new_evm.return_data();
+
+    let res = match result {
+        ExecutionResult::Success | ExecutionResult::Halt => {
+            *state = new_evm.state();
+            *storage = new_evm.storage();
+            1.into()
+        }
+        ExecutionResult::Revert => 0.into(),
+    };
+
+    stack.push(res);
+    Ok(res)
 }
