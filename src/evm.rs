@@ -444,12 +444,7 @@ impl Evm {
                 Ok(())
             }
             OpCode::Sload => {
-                let key = pop(&mut self.stack)?;
-                let value = self
-                    .storage
-                    .load_slot(U256::from_big_endian(&self.tx_data.to), key);
-
-                self.stack.push(value);
+                sload(&mut self.stack, &mut self.storage, &self.tx_data.to)?;
                 Ok(())
             }
             OpCode::Sstore => {
@@ -1010,6 +1005,18 @@ fn mstore8(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, Execution
     let value_bytes = value.to_big_endian();
 
     memory.save_byte(offset.as_usize(), value_bytes[31])?;
+    Ok(value)
+}
+
+fn sload(
+    stack: &mut Vec<U256>,
+    storage: &mut Storage,
+    address: &[u8],
+) -> Result<U256, ExecutionError> {
+    let key = pop(stack)?;
+    let value = storage.load_slot(U256::from_big_endian(address), key);
+
+    stack.push(value);
     Ok(value)
 }
 
