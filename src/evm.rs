@@ -475,6 +475,20 @@ impl Evm {
                 )?;
                 Ok(())
             }
+            OpCode::Create => {
+                create(
+                    &mut self.stack,
+                    &mut self.memory,
+                    &mut self.state,
+                    &mut self.storage,
+                    &self.tx_data.to,
+                    &self.tx_data.origin,
+                    &mut self.last_return_data,
+                    self.read_only,
+                )?;
+
+                Ok(())
+            }
             OpCode::Call => {
                 call(
                     &mut self.stack,
@@ -1064,7 +1078,7 @@ fn sha3(stack: &mut Vec<U256>, memory: &mut Memory) -> Result<U256, ExecutionErr
     Ok(result)
 }
 
-pub fn balance(stack: &mut Vec<U256>, state: &State) -> Result<U256, ExecutionError> {
+fn balance(stack: &mut Vec<U256>, state: &State) -> Result<U256, ExecutionError> {
     let address = pop(stack)?;
     let balance = state.get_balance(address);
 
@@ -1072,7 +1086,7 @@ pub fn balance(stack: &mut Vec<U256>, state: &State) -> Result<U256, ExecutionEr
     Ok(balance)
 }
 
-pub fn calldataload(stack: &mut Vec<U256>, data: &Vec<u8>) -> Result<U256, ExecutionError> {
+fn calldataload(stack: &mut Vec<U256>, data: &Vec<u8>) -> Result<U256, ExecutionError> {
     let index = pop(stack)?;
 
     let mut copied_data = [0u8; 32];
@@ -1123,7 +1137,7 @@ fn copy_data_to_memory(
     Ok(())
 }
 
-pub fn logx(
+fn logx(
     x: usize,
     stack: &mut Vec<U256>,
     memory: &mut Memory,
@@ -1152,7 +1166,7 @@ pub fn logx(
     Ok(())
 }
 
-pub fn return_func(
+fn return_func(
     stack: &mut Vec<U256>,
     memory: &mut Memory,
     return_data: &mut Vec<u8>,
@@ -1166,7 +1180,7 @@ pub fn return_func(
     Ok(())
 }
 
-pub fn call(
+fn call(
     stack: &mut Vec<U256>,
     memory: &mut Memory,
     state: &mut State,
@@ -1236,7 +1250,7 @@ pub fn call(
     Ok(())
 }
 
-pub fn delegatecall(
+fn delegatecall(
     stack: &mut Vec<U256>,
     memory: &mut Memory,
     state: &mut State,
@@ -1300,7 +1314,7 @@ pub fn delegatecall(
     Ok(())
 }
 
-pub fn staticcall(
+fn staticcall(
     stack: &mut Vec<U256>,
     memory: &mut Memory,
     state: &mut State,
@@ -1359,4 +1373,79 @@ pub fn staticcall(
 
     stack.push(res);
     Ok(res)
+}
+
+fn create(
+    stack: &mut Vec<U256>,
+    memory: &mut Memory,
+    state: &mut State,
+    storage: &mut Storage,
+    tx_to: &[u8],
+    tx_origin: &[u8],
+    last_ret_data: &mut Vec<u8>,
+    read_only: bool,
+) -> Result<U256, ExecutionError> {
+    if read_only {
+        return Err(ExecutionError::ReadOnly);
+    }
+
+    let value = pop(stack)?;
+    let offset = pop(stack)?.as_usize();
+    let size = pop(stack)?.as_usize();
+
+    let code = memory.get_bytes(offset, size)?;
+    let address = U256::from_big_endian(tx_to);
+    let nonce = state.get_nonce(address);
+
+    let contract_address = calculate_address(tx_to, nonce);
+    let contract_address_bytes = contract_address.to_big_endian();
+
+    let value_bytes = value.to_big_endian();
+
+    let tx_data = TxData::new(vec![
+        contract_address_bytes.to_vec(),
+        tx_to.to_vec(),
+        tx_origin.to_vec(),
+        vec![],
+        value_bytes.to_vec(),
+        vec![],
+    ]);
+
+    let block_data = BlockData::new(vec![]);
+
+    let mut new_evm = Evm::new(
+        Box::from(code),
+        vec![],
+        tx_data,
+        block_data,
+        state.clone(),
+        storage.clone(),
+        vec![],
+        vec![],
+        vec![],
+        false,
+    );
+
+    let result = new_evm.execute();
+
+    let res = match result {
+        ExecutionResult::Success | ExecutionResult::Halt => {
+            *state = new_evm.state();
+            *storage = new_evm.storage();
+
+            state.save_code(contract_address, new_evm.return_data(), value)?;
+            *last_ret_data = new_evm.return_data();
+            contract_address
+        }
+        ExecutionResult::Revert => 0.into(),
+    };
+
+    stack.push(res);
+    Ok(res)
+}
+
+fn calculate_address(sender_address: &[u8], nonce: usize) -> U256 {
+    let result = sha3_hash(&[sender_address, &nonce.to_be_bytes()].concat()).to_vec();
+    let result = result.get(12..).unwrap_or(&[0_u8; 20]);
+    U256::from_big_endian(&result)
 }
