@@ -76,6 +76,26 @@ impl State {
             }
         }
     }
+
+    pub fn transfer_balance(&mut self, balance: U256, dest: U256) {
+        if let Some(account) = self.entries.iter_mut().find(|s| s.address == dest) {
+            account.data.balance += balance;
+        } else {
+            let new_account = StateData {
+                address: dest,
+                data: AddressData {
+                    nonce: 0,
+                    balance,
+                    code: vec![],
+                },
+            };
+            self.entries.push(new_account);
+        }
+    }
+
+    pub fn delete_account(&mut self, address: U256) {
+        self.entries.retain(|account| account.address != address);
+    }
 }
 
 #[derive(Debug, Clone)]

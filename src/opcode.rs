@@ -159,6 +159,7 @@ opcodes! {
     Delegatecall(244),
     Staticcall(250),
     Revert(253),
+    Selfdestruct(255),
 }
 
 impl OpCode {

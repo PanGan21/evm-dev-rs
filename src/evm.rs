@@ -542,6 +542,15 @@ impl Evm {
 
                 Err(ExecutionError::Revert)
             }
+            OpCode::Selfdestruct => {
+                selfdestruct(
+                    &mut self.stack,
+                    &mut self.state,
+                    &self.tx_data.to,
+                    self.read_only,
+                )?;
+                Ok(())
+            }
         }
     }
 
@@ -1448,4 +1457,23 @@ fn calculate_address(sender_address: &[u8], nonce: usize) -> U256 {
     let result = sha3_hash(&[sender_address, &nonce.to_be_bytes()].concat()).to_vec();
     let result = result.get(12..).unwrap_or(&[0_u8; 20]);
     U256::from_big_endian(&result)
+}
+
+fn selfdestruct(
+    stack: &mut Vec<U256>,
+    state: &mut State,
+    tx_to: &[u8],
+    read_only: bool,
+) -> Result<(), ExecutionError> {
+    if read_only {
+        return Err(ExecutionError::ReadOnly);
+    }
+
+    let dest_address = pop(stack)?;
+    let src_address = U256::from_big_endian(tx_to);
+
+    let balance = state.get_balance(src_address);
+    state.transfer_balance(balance, dest_address);
+    state.delete_account(src_address);
+    Ok(())
 }
